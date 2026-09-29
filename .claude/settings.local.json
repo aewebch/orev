@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(Get-Service MariaDB)",
-      "PowerShell(& \"C:\\\\Program Files\\\\MariaDB 13.0\\\\bin\\\\mariadb.exe\" -u root -e \"SELECT VERSION\\(\\);\")",
-      "PowerShell(Get-Service | Where-Object { $_.Name -match 'maria|mysql' -or $_.DisplayName -match 'maria|mysql' } | Select-Object Name,DisplayName,Status; Get-Process | Where-Object ProcessName -match 'mariadbd|mysqld' | Select-Object ProcessName,Id; Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object LocalPort -in 3306,3307 | Select-Object LocalAddress,LocalPort,OwningProcess; Test-Path \"C:\\\\ProgramData\\\\MariaDB\\\\data\")"
-    ]
-  }
-}
