@@ -153,7 +153,7 @@ function aktionMitgliedHinzufuegen() {
   }
 
   eventAendern($id, function (&$event) use ($personId, $rollen) {
-    if (mitgliedVon($event, $personId) === null) $event['mitglieder'][] = array('person_id' => $personId, 'rollen' => array_values(array_unique($rollen)));
+    if (mitgliedVon($event, $personId) === null) $event['mitglieder'][] = array('person_id' => $personId, 'rollen' => array_values(array_unique($rollen)), 'farbe' => '');
   });
   eventAntwort($id, $ich);
 }
@@ -175,9 +175,7 @@ function aktionMitgliedEntfernen() {
     foreach ($event['tage'] as $i => $tag) {
       $event['tage'][$i]['verantwortliche'] = array_values(array_diff($tag['verantwortliche'], array($personId)));
     }
-    foreach ($event['programmpunkte'] as $i => $punkt) {
-      $event['programmpunkte'][$i]['personen'] = array_values(array_diff($punkt['personen'], array($personId)));
-    }
+    personAusProgrammEntfernen($event, $personId);
   });
   eventAntwort($id, $ich);
 }
@@ -203,6 +201,26 @@ function aktionMitgliedRollen() {
     }
     if (!$gefunden) abbrechen('Person gehört nicht zum Event.');
     if (anzahlEventLeitungen($event) === 0) abbrechen('Mindestens eine Person muss Event-Leitung bleiben.');
+  });
+  eventAntwort($id, $ich);
+}
+
+/* Farbe einer Person in diesem Event (Agenda, Chips) */
+function aktionMitgliedFarbe() {
+  nurPost();
+  $ich = pflichtAnmeldung();
+  $id = eventIdAusEingabe();
+  pflichtRecht(eventFuerMitglied($id, $ich), $ich, 'personen', RECHT_BEARBEITEN);
+  $personId = (string) feld('personId');
+  $farbe = farbeAusEingabe(feld('farbe'));
+  eventAendern($id, function (&$event) use ($personId, $farbe) {
+    foreach ($event['mitglieder'] as $i => $m) {
+      if ($m['person_id'] === $personId) {
+        $event['mitglieder'][$i]['farbe'] = $farbe;
+        return;
+      }
+    }
+    abbrechen('Person gehört nicht zum Event.');
   });
   eventAntwort($id, $ich);
 }
@@ -256,6 +274,7 @@ function aktionTeamSpeichern() {
   $event = eventFuerMitglied($id, $ich);
   $teamId = (string) feld('teamId');
   $name = (string) feld('name');
+  $farbe = farbeAusEingabe(feld('farbe'));
   $eingabe = feld('mitglieder', array());
   if ($name === '' || mb_strlen($name) > 80) fehler('Bitte geben Sie einen Teamnamen an (höchstens 80 Zeichen).');
   if ($teamId === '') {
@@ -270,14 +289,15 @@ function aktionTeamSpeichern() {
     if (!is_string($personId) || mitgliedVon($event, $personId) === null) fehler('Team-Mitglieder müssen zum Event gehören.');
     $mitglieder[$personId] = array('person_id' => $personId, 'ist_leitung' => isset($m['istLeitung']) && $m['istLeitung'] === true);
   }
-  eventAendern($id, function (&$event) use ($teamId, $name, $mitglieder) {
+  eventAendern($id, function (&$event) use ($teamId, $name, $farbe, $mitglieder) {
     if ($teamId === '') {
-      $event['teams'][] = array('id' => uuid(), 'name' => $name, 'mitglieder' => array_values($mitglieder));
+      $event['teams'][] = array('id' => uuid(), 'name' => $name, 'farbe' => $farbe, 'mitglieder' => array_values($mitglieder));
       return;
     }
     foreach ($event['teams'] as $i => $team) {
       if ($team['id'] !== $teamId) continue;
       $event['teams'][$i]['name'] = $name;
+      $event['teams'][$i]['farbe'] = $farbe;
       $event['teams'][$i]['mitglieder'] = array_values($mitglieder);
     }
   });
@@ -292,9 +312,7 @@ function aktionTeamLoeschen() {
   $teamId = (string) feld('teamId');
   eventAendern($id, function (&$event) use ($teamId) {
     $event['teams'] = array_values(array_filter($event['teams'], function ($t) use ($teamId) { return $t['id'] !== $teamId; }));
-    foreach ($event['programmpunkte'] as $i => $punkt) {
-      $event['programmpunkte'][$i]['teams'] = array_values(array_diff($punkt['teams'], array($teamId)));
-    }
+    teamAusProgrammEntfernen($event, $teamId);
   });
   eventAntwort($id, $ich);
 }

@@ -4,6 +4,20 @@
 
 define('OREV_MAX_EVENT_TAGE', 60);
 
+/* Farben für Programmpunkte, Personen und Teams: feste Palette, damit Kontrast und Druck stimmen (css/orev.css, .farbe--*) */
+function farben() {
+  return array('rot', 'orange', 'gelb', 'gruen', 'tuerkis', 'blau', 'violett', 'rosa', 'braun', 'grau');
+}
+
+function farbeAusEingabe($wert) {
+  return in_array($wert, farben(), true) ? $wert : '';
+}
+
+/* Sichtbarer Zeitbereich der Agenda in ganzen Stunden (0 bis 24); Punkte ausserhalb erweitern ihn in der Anzeige */
+function agendaStandard() {
+  return array('von' => 7, 'bis' => 24);
+}
+
 function datumGueltig($datum) {
   if (!is_string($datum) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $datum)) return false;
   list($j, $m, $t) = array_map('intval', explode('-', $datum));
@@ -42,9 +56,10 @@ function neuesEvent($felder, $erstellerId, $vorlagen) {
     'erstellt_am' => jetzt(),
     'tage' => eventTageErzeugen($felder['start_datum'], $felder['end_datum'], array()),
     'teams' => array(),
-    'mitglieder' => array(array('person_id' => $erstellerId, 'rollen' => array($leitung['id']))),
+    'mitglieder' => array(array('person_id' => $erstellerId, 'rollen' => array($leitung['id']), 'farbe' => '')),
     'rollen' => $rollen,
     'programmpunkte' => array(),
+    'agenda' => agendaStandard(),
   ));
 }
 
@@ -109,7 +124,7 @@ function eventOeffentlich($event, $wer, $personen) {
   foreach ($event['mitglieder'] as $mitglied) {
     foreach ($personen as $p) {
       if ($p['id'] !== $mitglied['person_id']) continue;
-      $namen[$p['id']] = array('id' => $p['id'], 'vorname' => $p['vorname'], 'name' => $p['name'], 'kuerzel' => $p['kuerzel']);
+      $namen[$p['id']] = array('id' => $p['id'], 'vorname' => $p['vorname'], 'name' => $p['name'], 'kuerzel' => $p['kuerzel'], 'farbe' => $mitglied['farbe']);
       if ($personenRecht >= RECHT_LESEN) {
         $namen[$p['id']]['email'] = $p['email'];
         $namen[$p['id']]['hatKonto'] = $p['konto'] !== null;
@@ -124,6 +139,7 @@ function eventOeffentlich($event, $wer, $personen) {
     $teams[] = array(
       'id' => $team['id'],
       'name' => $team['name'],
+      'farbe' => $team['farbe'],
       'mitglieder' => $sichtbar ? array_map(function ($m) { return array('personId' => $m['person_id'], 'istLeitung' => $m['ist_leitung']); }, $team['mitglieder']) : array(),
     );
   }
@@ -134,6 +150,7 @@ function eventOeffentlich($event, $wer, $personen) {
     return array('datum' => $tag['datum'], 'thema' => $tag['thema'], 'verantwortliche' => $tag['verantwortliche']);
   }, $event['tage']);
   $sicht['programmpunkte'] = sichtbareProgrammpunkte($event, $wer);
+  $sicht['agenda'] = $event['agenda'];
   $sicht['personen'] = $namen;
   $sicht['teams'] = $teams;
   $sicht['mitglieder'] = array();

@@ -22,6 +22,7 @@ require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
 require __DIR__ . '/src/aktionen/programm.php';
+require __DIR__ . '/src/aktionen/ablauf.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -76,6 +77,18 @@ try {
     'programmpunkt_speichern' => 'aktionProgrammpunktSpeichern',
     'programmpunkt_loeschen' => 'aktionProgrammpunktLoeschen',
     'programmpunkt_kopieren' => 'aktionProgrammpunktKopieren',
+    'programmpunkt_verschieben' => 'aktionProgrammpunktVerschieben',
+    'programmpunkt_einfuegen' => 'aktionProgrammpunktEinfuegen',
+    'agenda_speichern' => 'aktionAgendaSpeichern',
+    'mitglied_farbe' => 'aktionMitgliedFarbe',
+    'programmvorlagen_liste' => 'aktionProgrammvorlagenListe',
+    'programmvorlage_aus_punkt' => 'aktionProgrammvorlageAusPunkt',
+    'programmvorlage_speichern' => 'aktionProgrammvorlageSpeichern',
+    'programmvorlage_loeschen' => 'aktionProgrammvorlageLoeschen',
+    'ablauf_kopf_speichern' => 'aktionAblaufKopfSpeichern',
+    'ablaufschritt_speichern' => 'aktionAblaufschrittSpeichern',
+    'ablaufschritt_verschieben' => 'aktionAblaufschrittVerschieben',
+    'ablaufschritt_loeschen' => 'aktionAblaufschrittLoeschen',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();

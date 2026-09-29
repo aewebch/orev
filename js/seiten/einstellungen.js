@@ -54,6 +54,14 @@ var SeiteEinstellungen = {
           <ae-alert v-if="meldung" :tone="fehler ? 'danger' : 'success'">{{ meldung }}</ae-alert>
         </ae-card>
 
+        <ae-card v-if="tab === 'programmvorlagen'" subtitle="Bausteine für die Agenda aller Events, samt Ablaufplan. Neue Vorlagen entstehen im Programm über «Als Vorlage speichern».">
+          <template #actions><ae-button variant="secondary" icon="plus" @click="programmvorlageOeffnen(null)">Vorlage anlegen</ae-button></template>
+          <p v-if="programmvorlagen && !programmvorlagen.length" class="leer">Noch keine Programmvorlagen.</p>
+          <ae-card-row v-for="v in programmvorlagen" :key="v.id" :title="v.titel" :meta="programmvorlageMeta(v)" interaktiv @click="programmvorlageOeffnen(v)">
+            <template #trailing><farb-punkt :farbe="v.farbe"></farb-punkt></template>
+          </ae-card-row>
+        </ae-card>
+
         <ae-card v-if="tab === 'updates'">
           <template #actions><ae-button variant="secondary" icon="refresh-cw" :disabled="laeuft" @click="updatePruefen(true)">Auf Updates prüfen</ae-button></template>
           <div class="stapel">
@@ -104,7 +112,26 @@ var SeiteEinstellungen = {
         </template>
       </ae-modal>
 
-      <ae-modal v-if="person":title="person.id ? person.vorname + ' ' + person.name : 'Person erfassen'" @schliessen="person = null">
+      <ae-modal v-if="programmvorlage" :title="programmvorlage.id ? programmvorlage.titel : 'Programmvorlage anlegen'" :width="560" @schliessen="programmvorlage = null">
+        <form id="programmvorlage-formular" class="formular" @submit.prevent="programmvorlageSpeichern">
+          <ae-input v-model="programmvorlage.titel" label="Titel" required maxlength="120"></ae-input>
+          <div class="formular__zeile">
+            <ae-input v-model.number="programmvorlage.dauer" label="Dauer in Minuten" type="number" min="0" max="1440" step="5" hint="0 heisst ohne Ende."></ae-input>
+            <ae-input v-model="programmvorlage.ort" label="Ort" icon="map-pin" maxlength="200"></ae-input>
+          </div>
+          <ae-textarea v-model="programmvorlage.beschreibung" label="Beschreibung" maxlength="5000" :rows="3"></ae-textarea>
+          <farbe-auswahl v-model="programmvorlage.farbe"></farbe-auswahl>
+          <p v-if="programmvorlage.schritte" class="leise">Enthält einen Ablaufplan mit {{ programmvorlage.schritte }} {{ programmvorlage.schritte === 1 ? 'Schritt' : 'Schritten' }}.</p>
+          <ae-alert v-if="personFehler" tone="danger">{{ personFehler }}</ae-alert>
+          <div v-if="programmvorlage.id" class="reihe"><ae-button variant="tertiary" icon="trash-2" @click="programmvorlageLoeschen">Vorlage löschen</ae-button></div>
+        </form>
+        <template #footer>
+          <ae-button variant="tertiary" @click="programmvorlage = null">Schliessen</ae-button>
+          <ae-button type="submit" form="programmvorlage-formular" size="md">Speichern</ae-button>
+        </template>
+      </ae-modal>
+
+      <ae-modal v-if="person" :title="person.id ? person.vorname + ' ' + person.name : 'Person erfassen'" @schliessen="person = null">
         <form id="person-formular" class="formular" @submit.prevent="personSpeichern">
           <div class="formular__zeile">
             <ae-input v-model="person.vorname" label="Vorname" required maxlength="80"></ae-input>
@@ -147,6 +174,7 @@ var SeiteEinstellungen = {
         { id: 'allgemein', label: 'Allgemein', icon: 'settings' },
         { id: 'benutzer', label: 'Benutzer und Einladungen', icon: 'users' },
         { id: 'vorlagen', label: 'Rollenvorlagen', icon: 'shield-check' },
+        { id: 'programmvorlagen', label: 'Programmvorlagen', icon: 'list' },
         { id: 'mail', label: 'E-Mail', icon: 'mail' },
         { id: 'updates', label: 'Version und Updates', icon: 'refresh-cw' },
       ],
@@ -164,6 +192,8 @@ var SeiteEinstellungen = {
       stand: null,
       updateMeldung: '',
       vorlage: null,
+      programmvorlagen: null,
+      programmvorlage: null,
     }
   },
   watch: {
@@ -171,6 +201,7 @@ var SeiteEinstellungen = {
       this.meldung = ''
       if (neu === 'benutzer' && !this.personen) this.personenLaden()
       if (neu === 'updates' && !this.stand) this.updatePruefen(false)
+      if (neu === 'programmvorlagen' && !this.programmvorlagen) this.programmvorlagenLaden()
     },
   },
   async created() {
@@ -178,6 +209,34 @@ var SeiteEinstellungen = {
   },
   methods: {
     datumZeitText: datumZeitText,
+    async programmvorlagenLaden() {
+      this.programmvorlagen = (await api.anfrage('programmvorlagen_liste', {})).vorlagen
+    },
+    programmvorlageMeta(v) {
+      return [dauerText(v.dauer), v.ort, v.schritte ? 'Ablaufplan mit ' + v.schritte + (v.schritte === 1 ? ' Schritt' : ' Schritten') : ''].filter(Boolean).join(' · ')
+    },
+    programmvorlageOeffnen(v) {
+      this.personFehler = ''
+      this.programmvorlage = v ? Object.assign({}, v) : { id: '', titel: '', beschreibung: '', dauer: 60, ort: '', farbe: '', schritte: 0 }
+    },
+    async programmvorlageSpeichern() {
+      var v = this.programmvorlage
+      try {
+        this.programmvorlagen = (await api.anfrage('programmvorlage_speichern', { id: v.id, titel: v.titel, beschreibung: v.beschreibung, dauer: parseInt(v.dauer, 10) || 0, ort: v.ort, farbe: v.farbe })).vorlagen
+        this.programmvorlage = null
+      } catch (fehler) {
+        this.personFehler = fehler.message
+      }
+    },
+    async programmvorlageLoeschen() {
+      if (!confirm('Programmvorlage «' + this.programmvorlage.titel + '» löschen? Bestehende Programmpunkte bleiben erhalten.')) return
+      try {
+        this.programmvorlagen = (await api.anfrage('programmvorlage_loeschen', { id: this.programmvorlage.id })).vorlagen
+        this.programmvorlage = null
+      } catch (fehler) {
+        this.personFehler = fehler.message
+      }
+    },
     async speichern() {
       this.laeuft = true
       this.meldung = ''

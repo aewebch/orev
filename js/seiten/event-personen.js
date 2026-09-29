@@ -10,6 +10,7 @@ app.component('event-personen', {
         <template #trailing>
           <div class="reihe">
             <ae-badge v-for="r in m.rollen" :key="r.id" :color="r.istEventLeitung ? 'primary' : 'secondary'" :variant="r.istEventLeitung ? 'solid' : 'tint'">{{ r.name }}</ae-badge>
+            <farb-punkt :farbe="m.person.farbe"></farb-punkt>
             <ae-badge v-if="!m.person.hatKonto" color="neutral">{{ m.person.eingeladenBis ? 'Eingeladen' : 'Ohne Konto' }}</ae-badge>
           </div>
         </template>
@@ -21,6 +22,7 @@ app.component('event-personen', {
       <p v-if="!event.teams.length" class="leer">Noch keine Teams.</p>
       <ae-card-row v-for="t in event.teams" :key="t.id" :title="t.name" :meta="teamMeta(t)" :interaktiv="darfTeam(t)" @click="darfTeam(t) && teamOeffnen(t)">
         <template #leading><ae-avatar :name="t.name" :size="40"></ae-avatar></template>
+        <template #trailing><farb-punkt :farbe="t.farbe"></farb-punkt></template>
       </ae-card-row>
     </ae-card>
 
@@ -80,6 +82,8 @@ app.component('event-personen', {
           </div>
         </template>
 
+        <farbe-auswahl :model-value="person.farbe" label="Farbe in der Agenda" @update:model-value="farbeSetzen"></farbe-auswahl>
+
         <div v-if="einladungsLink" class="stapel stapel--eng">
           <span class="klein">{{ einladungGesendet ? 'Die Einladung wurde per E-Mail versendet. Link zum Weitergeben:' : 'Einladungslink (7 Tage gültig, nur einmal verwendbar):' }}</span>
           <div class="code">{{ einladungsLink }}</div>
@@ -96,6 +100,7 @@ app.component('event-personen', {
     <ae-modal v-if="team" :title="team.id ? team.name : 'Team anlegen'" @schliessen="team = null">
       <form id="team-formular" class="formular" @submit.prevent="teamSpeichern">
         <ae-input v-model="team.name" label="Name" required maxlength="80" placeholder="z. B. Küche"></ae-input>
+        <farbe-auswahl v-model="team.farbe" label="Farbe in der Agenda"></farbe-auswahl>
         <span class="klein">Mitglieder</span>
         <personen-auswahl v-model="team.mitglieder" :personen="personenListe"></personen-auswahl>
         <template v-if="team.mitglieder.length">
@@ -182,6 +187,7 @@ app.component('event-personen', {
       this.person = {
         person: m.person,
         rollen: m.rollen.map(function (r) { return r.id }),
+        farbe: m.person.farbe,
         angaben: { vorname: m.person.vorname, name: m.person.name, kuerzel: m.person.kuerzel, email: m.person.email || '' },
       }
     },
@@ -197,6 +203,16 @@ app.component('event-personen', {
         await this.eventAktion('mitglied_rollen', { personId: this.person.person.id, rollen: this.person.rollen })
       } catch (fehler) {
         this.person.rollen = vorher
+        this.dialogFehler = fehler.message
+      }
+    },
+    async farbeSetzen(farbe) {
+      var vorher = this.person.farbe
+      this.person.farbe = farbe
+      try {
+        await this.eventAktion('mitglied_farbe', { personId: this.person.person.id, farbe: farbe })
+      } catch (fehler) {
+        this.person.farbe = vorher
         this.dialogFehler = fehler.message
       }
     },
@@ -219,14 +235,14 @@ app.component('event-personen', {
     teamOeffnen(t) {
       this.dialogFehler = ''
       this.team = t
-        ? { id: t.id, name: t.name, mitglieder: t.mitglieder.map(function (m) { return m.personId }), leitung: t.mitglieder.filter(function (m) { return m.istLeitung }).map(function (m) { return m.personId }) }
-        : { id: '', name: '', mitglieder: [], leitung: [] }
+        ? { id: t.id, name: t.name, farbe: t.farbe, mitglieder: t.mitglieder.map(function (m) { return m.personId }), leitung: t.mitglieder.filter(function (m) { return m.istLeitung }).map(function (m) { return m.personId }) }
+        : { id: '', name: '', farbe: '', mitglieder: [], leitung: [] }
     },
     async teamSpeichern() {
       var t = this.team
       var mitglieder = t.mitglieder.map(function (id) { return { personId: id, istLeitung: t.leitung.includes(id) } })
       try {
-        await this.eventAktion('team_speichern', { teamId: t.id, name: t.name, mitglieder: mitglieder })
+        await this.eventAktion('team_speichern', { teamId: t.id, name: t.name, farbe: t.farbe, mitglieder: mitglieder })
         this.team = null
       } catch (fehler) {
         this.dialogFehler = fehler.message

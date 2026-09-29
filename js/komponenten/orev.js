@@ -1,4 +1,4 @@
-/* App-eigene Bausteine: Bereiche und Stufen der Rechte, Rechte-Matrix, Personenauswahl */
+/* App-eigene Bausteine: Bereiche und Stufen der Rechte, Rechte-Matrix, Personenauswahl, Farben */
 var BEREICHE = [
   { id: 'stammdaten', label: 'Event-Stammdaten' },
   { id: 'konzept', label: 'Konzept (Ziele, Zielgruppe)' },
@@ -80,4 +80,78 @@ function wochentagText(iso) {
 
 function zeitraumText(start, ende) {
   return start === ende ? datumText(start + 'T12:00:00') : datumText(start + 'T12:00:00') + ' – ' + datumText(ende + 'T12:00:00')
+}
+
+/* Feste Farbpalette (wie src/events.php farben()); die Werte stehen in css/orev.css unter .farbe--* */
+var FARBEN = [
+  { id: 'rot', label: 'Rot' }, { id: 'orange', label: 'Orange' }, { id: 'gelb', label: 'Gelb' }, { id: 'gruen', label: 'Grün' },
+  { id: 'tuerkis', label: 'Türkis' }, { id: 'blau', label: 'Blau' }, { id: 'violett', label: 'Violett' }, { id: 'rosa', label: 'Rosa' },
+  { id: 'braun', label: 'Braun' }, { id: 'grau', label: 'Grau' },
+]
+
+function farbKlasse(farbe) {
+  return farbe ? 'farbe--' + farbe : ''
+}
+
+app.component('farbe-auswahl', {
+  props: {
+    modelValue: { type: String, default: '' },
+    label: { type: String, default: 'Farbe' },
+    ohneText: { type: String, default: 'Keine' },
+    disabled: { type: Boolean, default: false },
+  },
+  emits: ['update:modelValue'],
+  template: `
+    <div class="feld">
+      <span class="klein">{{ label }}</span>
+      <div class="farben" role="radiogroup" :aria-label="label">
+        <button type="button" role="radio" :aria-checked="modelValue === ''" :disabled="disabled" :title="ohneText"
+          :class="['farbe-wahl', 'farbe-wahl--ohne', modelValue === '' ? 'farbe-wahl--aktiv' : '']" @click="$emit('update:modelValue', '')"><span class="sr-only">{{ ohneText }}</span></button>
+        <button v-for="f in farben" :key="f.id" type="button" role="radio" :aria-checked="modelValue === f.id" :disabled="disabled" :title="f.label"
+          :class="['farbe-wahl', 'farbe--' + f.id, modelValue === f.id ? 'farbe-wahl--aktiv' : '']" @click="$emit('update:modelValue', f.id)"><span class="sr-only">{{ f.label }}</span></button>
+      </div>
+    </div>
+  `,
+  data() {
+    return { farben: FARBEN }
+  },
+})
+
+/* Kleiner Farbpunkt vor Namen von Personen und Teams */
+app.component('farb-punkt', {
+  props: { farbe: { type: String, default: '' } },
+  template: `<span v-if="farbe" :class="['farb-punkt', 'farbe--' + farbe]" aria-hidden="true"></span>`,
+})
+
+/* Kürzel oder Vorname einer Person für enge Darstellungen (Agenda, Ablaufplan) */
+function personKurz(person) {
+  return person ? (person.kuerzel || person.vorname) : '?'
+}
+
+/* Farbe eines Programmpunkts: eigene Farbe, sonst die des ersten farbigen Teams, sonst der ersten farbigen Person */
+function punktFarbe(punkt, event) {
+  if (punkt.farbe) return punkt.farbe
+  for (var i = 0; i < punkt.teams.length; i++) {
+    var team = event.teams.find(function (t) { return t.id === punkt.teams[i] })
+    if (team && team.farbe) return team.farbe
+  }
+  for (var j = 0; j < punkt.personen.length; j++) {
+    var person = event.personen[punkt.personen[j]]
+    if (person && person.farbe) return person.farbe
+  }
+  return ''
+}
+
+/* Datum plus Minuten als JJJJ-MM-TTTHH:MM (lokale Zeit, über Mitternacht hinaus) */
+function zeitpunktPlus(datum, minuten) {
+  var d = new Date(datum + 'T00:00:00')
+  d.setMinutes(d.getMinutes() + minuten)
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
+}
+
+function dauerText(minuten) {
+  if (!minuten) return 'offen'
+  var h = Math.floor(minuten / 60)
+  var m = minuten % 60
+  return (h ? h + ' h' : '') + (h && m ? ' ' : '') + (m ? m + ' min' : '')
 }

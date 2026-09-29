@@ -9,11 +9,12 @@ var EVENT_NAVIGATION = [
   ] },
   { phase: 'Durchführung', bereiche: [
     { id: 'programm', label: 'Programm', icon: 'calendar-days', recht: 'programm', komponente: 'event-programm' },
+    { id: 'ablauf', label: 'Ablaufpläne', icon: 'list-ordered', recht: 'ablauf', komponente: 'event-ablauf' },
   ] },
 ]
 
 var SeiteEvent = {
-  props: { id: { type: String, required: true }, bereich: { type: String, default: 'uebersicht' } },
+  props: { id: { type: String, required: true }, bereich: { type: String, default: 'uebersicht' }, punktId: { type: String, default: '' } },
   template: `
     <main class="seite">
       <ae-card v-if="!event && fehler" padding="even"><ae-alert tone="danger">{{ fehler }}</ae-alert></ae-card>
@@ -30,7 +31,7 @@ var SeiteEvent = {
           </div>
         </div>
         <div class="event">
-          <nav class="event__nav" aria-label="Bereiche des Events">
+          <nav class="event__nav nicht-drucken" aria-label="Bereiche des Events">
             <template v-for="gruppe in navigation" :key="gruppe.phase">
               <div class="event__phase">{{ gruppe.phase }}</div>
               <ae-nav-item v-for="b in gruppe.bereiche" :key="b.id" :icon="b.icon" :active="b.id === aktiv.id" @click="oeffnen(b.id)">{{ b.label }}</ae-nav-item>
@@ -38,7 +39,7 @@ var SeiteEvent = {
           </nav>
           <div class="event__inhalt">
             <ae-alert v-if="meldung" :tone="meldungFehler ? 'danger' : 'success'">{{ meldung }}</ae-alert>
-            <component :is="aktiv.komponente" :event="event"></component>
+            <component :is="aktiv.komponente" :event="event" v-bind="aktiv.id === 'ablauf' ? { punktId: punktId } : {}"></component>
           </div>
         </div>
       </template>
