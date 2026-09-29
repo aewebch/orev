@@ -1,0 +1,9 @@
+# Originaldateien nicht versionieren: das BeachCamp-Excel enthält eine echte Teilnehmerliste
+docs/referenz/*.xlsx
+docs/referenz/*.zip
+
+.claude/settings.local.json
+config/config.php
+storage/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+:root{
+--duration-base:0.35s; /* @kind other */
+--duration-checkbox:0.3s; /* @kind other */
+--ease-base:ease; /* @kind other */
+--transition:all 0.35s ease; /* @kind other */
+--transition-checkbox:background-color 0.3s ease,border-color 0.3s ease; /* @kind other */
+}

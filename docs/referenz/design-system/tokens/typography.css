@@ -1,0 +1,25 @@
+:root{
+--font-sans:'exaFont','Manrope',sans-serif;
+--font-museo:'Museo Sans',sans-serif;
+--font-raveo:'Raveo',sans-serif;
+--font-multa:'Multa Pecunia',sans-serif;
+--weight-light:300;
+--weight-regular:400;
+--weight-bold:700;
+--text-caption:12px;
+--text-small:13px;
+--text-label:14px;
+--text-body:16px;
+--text-body-lg:18px;
+--text-h4:21px;
+--text-h3:24px;
+--text-h2:30px;
+--text-h1:40px;
+--leading-tight:1.2;
+--leading-body:1.5;
+--tracking-button:0.5px;
+/* Semantic */
+--type-body-weight:var(--weight-light);
+--type-heading-weight:var(--weight-bold);
+--type-label-weight:var(--weight-bold);
+}

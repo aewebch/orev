@@ -1,0 +1,7 @@
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);font-size:var(--text-body);font-weight:var(--weight-light);line-height:var(--leading-body);color:var(--color-text);background:var(--color-page-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-sans);font-weight:var(--weight-bold);line-height:var(--leading-tight);margin:0}
+h1{font-size:var(--text-h1)}h2{font-size:var(--text-h2)}h3{font-size:var(--text-h3)}h4{font-size:var(--text-h4)}
+button,input,select,textarea{font-family:inherit}
+a{color:var(--color-secondary);text-decoration:none;transition:var(--transition)}
+a:hover{color:var(--color-primary)}

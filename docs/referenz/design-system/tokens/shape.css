@@ -1,0 +1,30 @@
+:root{
+/* Radius — 10px is the default for anything interactive */
+--radius-xs:4px;
+--radius-sm:5px;
+--radius-md:8px;
+--radius-lg:10px;
+--radius-pill:16px;
+--radius-xl:20px;
+--radius-2xl:40px;
+--radius-full:50%;
+--radius-modal:20px;
+--radius-modal-inner:calc(var(--radius-modal) - var(--pad-modal-frame));
+/* Border widths */
+--border-width:1px;
+--border-width-focus:2px;
+--border-width-divider:2px;
+--border-default:1px solid var(--secondary-10);
+--border-divider:2px dashed var(--secondary-10);
+/* Elevation — calm at rest, contrast on overlay */
+--shadow-card:4px 4px 16px 3.2px rgba(0,0,0,0.03);
+--shadow-soft:2px 2px 15px 0px rgba(190,190,180,0.5);
+--shadow-ring:0px 0px 0px 1px rgba(0,0,0,0.1);
+--shadow-focus:0px 0px 0px 2px inset var(--color-primary);
+--shadow-input-focus:1.6px 1.6px 0px 1.6px rgba(47,49,59,0.09),0px 0px 0px 1.6px inset var(--color-secondary);
+--shadow-hover-ring:0 0 1px 1px inset var(--color-secondary);
+--shadow-modal:0px 20px 60px rgba(0,0,0,0.2);
+--shadow-tooltip:-5px 13px 26px -5px rgba(0,0,0,0.36);
+/* Blur */
+--blur-overlay:15px;
+}
