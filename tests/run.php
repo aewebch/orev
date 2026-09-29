@@ -13,6 +13,7 @@ require dirname(__DIR__) . '/src/einstellungen.php';
 require dirname(__DIR__) . '/src/update.php';
 require dirname(__DIR__) . '/src/rechte.php';
 require dirname(__DIR__) . '/src/events.php';
+require dirname(__DIR__) . '/src/programm.php';
 
 $fehlgeschlagen = array();
 $anzahl = 0;

@@ -28,6 +28,7 @@ $skripte = array(
   'js/seiten/event-uebersicht.js',
   'js/seiten/event-personen.js',
   'js/seiten/event-rollen.js',
+  'js/seiten/event-programm.js',
   'js/seiten/konto.js',
   'js/seiten/einstellungen.js',
   'js/kern/router.js',

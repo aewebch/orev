@@ -3,9 +3,12 @@
    jede Antwort des Servers liefert das Event in der Sicht der angemeldeten Person zurück. */
 var EVENT_NAVIGATION = [
   { phase: 'Konzept und Vorbereitung', bereiche: [
-    { id: 'uebersicht', label: 'Übersicht und Tage', icon: 'calendar', recht: 'stammdaten', komponente: 'event-uebersicht' },
+    { id: 'uebersicht', label: 'Übersicht und Tage', icon: 'info', recht: 'stammdaten', komponente: 'event-uebersicht' },
     { id: 'personen', label: 'Personen und Teams', icon: 'users', recht: 'personen', komponente: 'event-personen' },
     { id: 'rollen', label: 'Rollen und Rechte', icon: 'shield-check', recht: 'personen', komponente: 'event-rollen' },
+  ] },
+  { phase: 'Durchführung', bereiche: [
+    { id: 'programm', label: 'Programm', icon: 'calendar-days', recht: 'programm', komponente: 'event-programm' },
   ] },
 ]
 

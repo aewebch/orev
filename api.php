@@ -17,9 +17,11 @@ require __DIR__ . '/src/update.php';
 require __DIR__ . '/src/einrichtung.php';
 require __DIR__ . '/src/rechte.php';
 require __DIR__ . '/src/events.php';
+require __DIR__ . '/src/programm.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
+require __DIR__ . '/src/aktionen/programm.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -71,6 +73,9 @@ try {
     'team_loeschen' => 'aktionTeamLoeschen',
     'rolle_speichern' => 'aktionRolleSpeichern',
     'rolle_loeschen' => 'aktionRolleLoeschen',
+    'programmpunkt_speichern' => 'aktionProgrammpunktSpeichern',
+    'programmpunkt_loeschen' => 'aktionProgrammpunktLoeschen',
+    'programmpunkt_kopieren' => 'aktionProgrammpunktKopieren',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();

@@ -18,6 +18,10 @@
 .seite__kopf{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .seite__kicker{font-size:var(--text-small);font-weight:var(--weight-bold);color:var(--color-primary);text-transform:uppercase;letter-spacing:var(--tracking-button);margin:0 0 4px}
 
+/* Lange Dialoge scrollen statt oben abgeschnitten zu werden; kurze bleiben mittig (margin:auto im Flex-Container) */
+.ae-overlay{overflow-y:auto;align-items:flex-start}
+.ae-modal{margin:auto}
+
 /* Formulare */
 .formular{display:flex;flex-direction:column;gap:24px}
 .formular__zeile{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
@@ -83,6 +87,28 @@
 .tag__datum{font-weight:var(--weight-bold);font-size:var(--text-label)}
 .tag__wochentag{display:block;font-size:var(--text-caption);font-weight:var(--weight-regular);color:var(--color-text-muted);text-transform:uppercase}
 
+/* Programm: Werkzeugleiste, Zeitraster (Woche/Tag) und Liste */
+.werkzeuge{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.werkzeuge .feld{min-width:160px}
+.raster{overflow-x:auto;margin:0 -32px;padding:0 32px}
+.raster__gitter{display:grid;min-width:100%}
+.raster__kopf{position:sticky;top:0;z-index:2;background:var(--color-surface);padding:0 4px 8px;border-bottom:var(--border-default);min-width:0}
+.raster__tag{font-weight:var(--weight-bold);font-size:var(--text-label)}
+.raster__thema{font-size:var(--text-caption);color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.raster__zeiten{position:relative}
+.raster__zeit{position:absolute;right:8px;font-size:var(--text-caption);color:var(--color-text-muted);margin-top:2px}
+.raster__spalte{position:relative;border-left:var(--border-default);background-image:linear-gradient(var(--secondary-5) 1px,transparent 1px);background-size:100% var(--stunde)}
+.raster__punkt{position:absolute;padding:2px;min-width:0}
+.raster__karte{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;width:100%;height:100%;overflow:hidden;border:0;text-align:left;cursor:pointer;border-radius:var(--radius-md);background:var(--primary-10);border-left:3px solid var(--color-primary);padding:2px 6px;font-size:var(--text-caption);line-height:1.3;color:var(--color-text);transition:var(--transition)}
+.raster__karte:hover{background:var(--primary-20)}
+.raster__karte:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.raster__karte strong{display:block;flex:none;font-size:var(--text-small);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.raster__karte--mein{background:var(--secondary-10);border-left-color:var(--color-secondary)}
+.raster__karte--mein:hover{background:var(--secondary-20)}
+.liste__tag{margin:24px 0 4px;font-size:var(--text-label);font-weight:var(--weight-bold)}
+.liste__tag:first-child{margin-top:0}
+.liste__zeit{flex:none;width:96px;font-size:var(--text-small);font-weight:var(--weight-bold)}
+
 @media (max-width:900px){
   .event{grid-template-columns:minmax(0,1fr)}
   .event__nav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:4px}
@@ -92,6 +118,9 @@
 
 @media (max-width:640px){
   .tag{grid-template-columns:minmax(0,1fr);gap:8px}
+  .raster{margin:0 -16px;padding:0 16px}
+  .ae-overlay{padding:16px 8px}
+  .liste__zeit{width:72px}
   .seite{padding:16px 16px 64px}
   .ae-card{padding:16px}
   .ae-row{padding:12px 16px;margin:0 -16px}

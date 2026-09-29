@@ -175,6 +175,9 @@ function aktionMitgliedEntfernen() {
     foreach ($event['tage'] as $i => $tag) {
       $event['tage'][$i]['verantwortliche'] = array_values(array_diff($tag['verantwortliche'], array($personId)));
     }
+    foreach ($event['programmpunkte'] as $i => $punkt) {
+      $event['programmpunkte'][$i]['personen'] = array_values(array_diff($punkt['personen'], array($personId)));
+    }
   });
   eventAntwort($id, $ich);
 }

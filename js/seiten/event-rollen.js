@@ -16,7 +16,21 @@ app.component('event-rollen', {
         <ae-input v-model="rolle.name" label="Name" required maxlength="80" :disabled="!darf" placeholder="z. B. Küche"></ae-input>
         <ae-alert v-if="rolle.istEventLeitung" tone="info">Die Event-Leitung hat Vollzugriff auf alles im Event. Mindestens eine Person muss diese Rolle behalten.</ae-alert>
         <rechte-matrix v-else v-model="rolle.rechte" :disabled="!darf"></rechte-matrix>
-        <p v-if="!rolle.istEventLeitung" class="leise">Rechte für einzelne Programmpunkte lassen sich festlegen, sobald es Programmpunkte gibt.</p>
+        <template v-if="!rolle.istEventLeitung">
+          <hr class="ae-divider ae-divider--dashed">
+          <div>
+            <h4 class="ae-card__title">Rechte für einzelne Programmpunkte</h4>
+            <p class="leise">Ergänzen die Rechte oben: Es gilt jeweils das höhere Recht.</p>
+          </div>
+          <p v-if="!event.programmpunkte.length" class="leise">Es gibt noch keine Programmpunkte.</p>
+          <div v-for="(r, i) in punktRechte" :key="i" class="formular__zeile">
+            <ae-select v-model="r.programmpunktId" label="Programmpunkt" :optionen="punktOptionen" :disabled="!darf"></ae-select>
+            <ae-select v-model="r.bereich" label="Bereich" :optionen="punktBereiche" :disabled="!darf"></ae-select>
+            <ae-select v-model.number="r.stufe" label="Recht" :optionen="[{ wert: 1, text: 'Lesen' }, { wert: 2, text: 'Bearbeiten' }]" :disabled="!darf"></ae-select>
+            <div v-if="darf" class="reihe"><ae-button variant="tertiary" icon="trash-2" @click="punktRechtEntfernen(r)">Entfernen</ae-button></div>
+          </div>
+          <div v-if="darf && event.programmpunkte.length" class="reihe"><ae-button variant="secondary" icon="plus" @click="punktRechtHinzufuegen">Recht für einen Programmpunkt</ae-button></div>
+        </template>
         <ae-alert v-if="fehler" tone="danger">{{ fehler }}</ae-alert>
         <div v-if="darf && rolle.id && !rolle.istEventLeitung" class="reihe"><ae-button variant="tertiary" icon="trash-2" @click="loeschen">Rolle löschen</ae-button></div>
       </form>
@@ -33,6 +47,17 @@ app.component('event-rollen', {
     darf() {
       return this.event.ich.hatLeitungsrechte
     },
+    punktRechte() {
+      return this.rolle.rechte.filter(function (r) { return r.programmpunktId })
+    },
+    punktOptionen() {
+      return this.event.programmpunkte.map(function (p) {
+        return { wert: p.id, text: wochentagText(p.start.slice(0, 10)) + ' ' + p.start.slice(8, 10) + '.' + p.start.slice(5, 7) + '. ' + p.start.slice(11) + ' · ' + p.titel }
+      })
+    },
+    punktBereiche() {
+      return BEREICHE.filter(function (b) { return ['programm', 'ablauf', 'aufgaben', 'material'].includes(b.id) }).map(function (b) { return { wert: b.id, text: b.label } })
+    },
   },
   methods: {
     anzahl(r) {
@@ -46,6 +71,8 @@ app.component('event-rollen', {
       var teile = []
       if (bearbeiten.length) teile.push('Bearbeiten: ' + bearbeiten.map(function (b) { return b.label }).join(', '))
       if (lesen.length) teile.push('Lesen: ' + lesen.map(function (b) { return b.label }).join(', '))
+      var proPunkt = r.rechte.filter(function (x) { return x.programmpunktId }).length
+      if (proPunkt) teile.push(proPunkt + (proPunkt === 1 ? ' Recht' : ' Rechte') + ' für einzelne Programmpunkte')
       return teile.join(' · ') || 'Keine Rechte'
     },
     oeffnen(r) {
@@ -53,6 +80,12 @@ app.component('event-rollen', {
       this.rolle = r
         ? { id: r.id, name: r.name, istEventLeitung: r.istEventLeitung, rechte: r.rechte.map(function (x) { return Object.assign({}, x) }) }
         : { id: '', name: '', istEventLeitung: false, rechte: [] }
+    },
+    punktRechtHinzufuegen() {
+      this.rolle.rechte.push({ bereich: 'programm', stufe: 1, programmpunktId: this.event.programmpunkte[0].id })
+    },
+    punktRechtEntfernen(recht) {
+      this.rolle.rechte.splice(this.rolle.rechte.indexOf(recht), 1)
     },
     async speichern() {
       try {

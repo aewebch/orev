@@ -133,6 +133,7 @@ function eventOeffentlich($event, $wer, $personen) {
   $sicht['tage'] = array_map(function ($tag) {
     return array('datum' => $tag['datum'], 'thema' => $tag['thema'], 'verantwortliche' => $tag['verantwortliche']);
   }, $event['tage']);
+  $sicht['programmpunkte'] = sichtbareProgrammpunkte($event, $wer);
   $sicht['personen'] = $namen;
   $sicht['teams'] = $teams;
   $sicht['mitglieder'] = array();
@@ -152,6 +153,7 @@ function eventOeffentlich($event, $wer, $personen) {
     'personId' => $personId,
     'recht' => $recht,
     'hatLeitungsrechte' => hatLeitungsrechte($event, $wer),
+    'darfProgrammAnlegen' => effektivesRecht($event, $wer, 'programm') === RECHT_BEARBEITEN,
     'istAdmin' => $wer['istAdmin'],
     'istMitglied' => mitgliedVon($event, $personId) !== null,
     'rollen' => array_map(function ($r) { return $r['name']; }, rollenVon($event, $personId)),
