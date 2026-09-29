@@ -1,0 +1,22 @@
+:root{
+/* 8px base unit */
+--space-1:4px;
+--space-2:8px;
+--space-3:16px;
+--space-4:24px;
+--space-5:32px;
+--space-6:96px;
+/* Applied */
+--pad-card:16px 32px 32px;
+--pad-card-even:32px;
+--pad-modal:16px;
+--pad-modal-frame:3px;
+--gap-form-fields:32px;
+--gap-label-input:8px;
+--pad-btn-sm:8px 12px;
+--pad-btn-md:12px 16px;
+--pad-btn-lg:12px 32px;
+--pad-btn-gradient:4px 24px 4px 4px;
+--pad-badge:2.4px 8px;
+--pad-input:8px;
+}

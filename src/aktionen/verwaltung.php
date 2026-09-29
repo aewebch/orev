@@ -1,0 +1,166 @@
+<?php
+/* Nur Installations-Admins: Benutzer und Einladungen, Einstellungen, Updates */
+
+function aktionBenutzerListe() {
+  pflichtAdmin();
+  $liste = array_map('personOeffentlich', personenLesen());
+  usort($liste, function ($a, $b) {
+    return strcasecmp($a['name'] . ' ' . $a['vorname'], $b['name'] . ' ' . $b['vorname']);
+  });
+  antwort(array('personen' => $liste));
+}
+
+function personenFelderPruefen() {
+  $felder = array(
+    'vorname' => (string) feld('vorname'),
+    'name' => (string) feld('name'),
+    'kuerzel' => (string) feld('kuerzel'),
+    'email' => (string) feld('email'),
+  );
+  if ($felder['vorname'] === '' || $felder['name'] === '') fehler('Bitte geben Sie Vorname und Name an.');
+  if (mb_strlen($felder['vorname']) > 80 || mb_strlen($felder['name']) > 80 || mb_strlen($felder['kuerzel']) > 10) fehler('Eine Angabe ist zu lang.');
+  if ($felder['email'] !== '' && !gueltigeEmail($felder['email'])) fehler('Bitte geben Sie eine gültige E-Mail-Adresse an.');
+  return $felder;
+}
+
+function aktionPersonSpeichern() {
+  nurPost();
+  pflichtAdmin();
+  $id = (string) feld('id');
+  $felder = personenFelderPruefen();
+  $ergebnis = personenAendern(function (&$personen) use ($id, $felder) {
+    $gleicheEmail = $felder['email'] !== '' ? personIndexNachEmail($personen, $felder['email']) : null;
+    if ($id === '') {
+      if ($gleicheEmail !== null) return 'Es gibt bereits eine Person mit dieser E-Mail-Adresse.';
+      $personen[] = neuePerson($felder['vorname'], $felder['name'], $felder['kuerzel'], $felder['email']);
+      return personOeffentlich($personen[count($personen) - 1]);
+    }
+    $i = personIndex($personen, $id);
+    if ($i === null) return 'Person nicht gefunden.';
+    if ($gleicheEmail !== null && $gleicheEmail !== $i) return 'Es gibt bereits eine Person mit dieser E-Mail-Adresse.';
+    if ($personen[$i]['konto'] !== null && $felder['email'] === '') return 'Personen mit Konto brauchen eine E-Mail-Adresse.';
+    $personen[$i] = array_merge($personen[$i], $felder);
+    return personOeffentlich($personen[$i]);
+  });
+  if (is_string($ergebnis)) fehler($ergebnis);
+  antwort(array('person' => $ergebnis));
+}
+
+/* Neue Einladung (ersetzt eine frühere). Bei bestehendem Konto dient sie als Link zum Zurücksetzen des Passworts. */
+function aktionEinladen() {
+  nurPost();
+  pflichtAdmin();
+  $id = (string) feld('id');
+  $ergebnis = personenAendern(function (&$personen) use ($id) {
+    $i = personIndex($personen, $id);
+    if ($i === null) return null;
+    if ($personen[$i]['email'] === '') return 'Für eine Einladung braucht die Person eine E-Mail-Adresse.';
+    $token = einladungAnlegen($personen[$i]);
+    return array('person' => $personen[$i], 'link' => einladungsLink($token));
+  });
+  if ($ergebnis === null) fehler('Person nicht gefunden.', 404);
+  if (is_string($ergebnis)) fehler($ergebnis);
+  $gesendet = einladungSenden($ergebnis['person'], $ergebnis['link']);
+  antwort(array('link' => $ergebnis['link'], 'gesendet' => $gesendet, 'person' => personOeffentlich($ergebnis['person'])));
+}
+
+function aktionEinladungZurueckziehen() {
+  nurPost();
+  pflichtAdmin();
+  $id = (string) feld('id');
+  personenAendern(function (&$personen) use ($id) {
+    $i = personIndex($personen, $id);
+    if ($i !== null) $personen[$i]['einladung'] = null;
+  });
+  antwort(array('ok' => true));
+}
+
+function anzahlAdmins($personen) {
+  $anzahl = 0;
+  foreach ($personen as $person) {
+    if ($person['konto'] !== null && $person['konto']['ist_admin']) $anzahl++;
+  }
+  return $anzahl;
+}
+
+function aktionAdminSetzen() {
+  nurPost();
+  $ich = pflichtAdmin();
+  $id = (string) feld('id');
+  $admin = feld('istAdmin') === true;
+  $meldung = personenAendern(function (&$personen) use ($id, $admin, $ich) {
+    $i = personIndex($personen, $id);
+    if ($i === null || $personen[$i]['konto'] === null) return 'Diese Person hat kein Konto.';
+    if (!$admin && $id === $ich['id']) return 'Sie können sich die Admin-Rechte nicht selbst entziehen.';
+    $personen[$i]['konto']['ist_admin'] = $admin;
+    if (anzahlAdmins($personen) === 0) return 'Es muss mindestens einen Installations-Admin geben.';
+    return '';
+  });
+  if ($meldung !== '') fehler($meldung);
+  antwort(array('ok' => true));
+}
+
+/* Konto entfernen: Die Person bleibt im Verzeichnis (Zuweisungen bleiben erhalten), kann sich aber nicht mehr anmelden */
+function aktionKontoEntfernen() {
+  nurPost();
+  $ich = pflichtAdmin();
+  $id = (string) feld('id');
+  if ($id === $ich['id']) fehler('Sie können Ihr eigenes Konto nicht entfernen.');
+  personenAendern(function (&$personen) use ($id) {
+    $i = personIndex($personen, $id);
+    if ($i === null) return;
+    $personen[$i]['konto'] = null;
+    $personen[$i]['einladung'] = null;
+  });
+  antwort(array('ok' => true));
+}
+
+function aktionEinstellungenLesen() {
+  pflichtAdmin();
+  antwort(array('einstellungen' => einstellungenOeffentlich(einstellungenLesen())));
+}
+
+function aktionEinstellungenSpeichern() {
+  nurPost();
+  pflichtAdmin();
+  $werte = array(
+    'name' => (string) feld('name'),
+    'zeitzone' => (string) feld('zeitzone', 'Europe/Zurich'),
+    'events_anlegen' => feld('eventsAnlegen') === 'alle' ? 'alle' : 'admins',
+    'ical_ganzes_programm' => feld('icalGanzesProgramm') === true,
+    'mail_aktiv' => feld('mailAktiv') === true,
+    'mail_absender' => (string) feld('mailAbsender'),
+    'github_repo' => (string) feld('githubRepo'),
+  );
+  if ($werte['name'] === '' || mb_strlen($werte['name']) > 80) fehler('Bitte geben Sie einen Namen für die Installation an.');
+  if (!in_array($werte['zeitzone'], timezone_identifiers_list(), true)) fehler('Unbekannte Zeitzone.');
+  if ($werte['mail_aktiv'] && !gueltigeEmail($werte['mail_absender'])) fehler('Bitte geben Sie eine gültige Absender-Adresse an.');
+  if (!preg_match('/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/', $werte['github_repo'])) fehler('Das Repository hat die Form «benutzer/repository».');
+  $token = feld('githubToken', null);
+  if ($token !== null) {
+    if ($token !== '' && !preg_match('/^[A-Za-z0-9_]{20,255}$/', $token)) fehler('Der GitHub-Token hat ein unerwartetes Format.');
+    $werte['github_token'] = $token;
+  }
+  $einstellungen = einstellungenAendern(function (&$daten) use ($werte) {
+    if ($daten['github_repo'] !== $werte['github_repo'] || isset($werte['github_token'])) $daten['update_stand'] = null;
+    $daten = array_merge($daten, $werte);
+    return $daten;
+  });
+  antwort(array('einstellungen' => einstellungenOeffentlich($einstellungen)));
+}
+
+function aktionUpdatePruefen() {
+  pflichtAdmin();
+  $stand = updateStand(feld('erzwingen') === true);
+  antwort(array('stand' => $stand));
+}
+
+function aktionUpdateInstallieren() {
+  nurPost();
+  pflichtAdmin();
+  try {
+    antwort(updateInstallieren());
+  } catch (RuntimeException $e) {
+    fehler($e->getMessage(), 502);
+  }
+}

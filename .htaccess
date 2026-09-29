@@ -1,0 +1,13 @@
+# Orev: nur index.php, api.php und die statischen Dateien sind öffentlich.
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(src|migrationen|tests|docs|daten|werkzeuge)(/|$) - [F,L]
+  RewriteRule ^(orev-konfiguration\.php|orev-einrichtungscode\.php|VERSION|\.git.*)$ - [F,L]
+</IfModule>
+
+<FilesMatch "^(orev-konfiguration\.php|orev-einrichtungscode\.php|\.gitignore|\.gitattributes)$">
+  Require all denied
+</FilesMatch>

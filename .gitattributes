@@ -3,3 +3,10 @@
 *.woff binary
 *.woff2 binary
 *.ttf binary
+
+# Nicht ins Release-Paket (GitHub-Zip), damit nichts davon im Webroot einer Installation landet
+docs/ export-ignore
+tests/ export-ignore
+werkzeuge/ export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore

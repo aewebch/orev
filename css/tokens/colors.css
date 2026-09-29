@@ -1,0 +1,59 @@
+/* aeweb — Color tokens. ONLY these base values change per application. */
+:root{
+/* Orev: warme Palette aus Ziegelrot (Primär) und Sandweiss (Seite), Aubergine als dunkle Zweitfarbe */
+/* Brand */
+--color-primary:#A14D4D;
+--color-primary-hover:#7D3636;
+--color-secondary:#4E2D3A;
+/* Neutral / text */
+--color-text:#362F2B;
+--color-text-muted:color-mix(in srgb,var(--color-text) 70%,transparent);
+--color-white:#FFFDFA;
+/* Surfaces */
+--color-surface:#FFFDFA;
+--color-page-bg:#F7F3EE;
+--color-page-bg-hover:color-mix(in srgb,var(--color-page-bg) 92%,var(--color-text));
+/* Status */
+--color-danger:#CA3721;
+--color-success:#307E50;
+--color-warning:#D99126;
+--color-info:var(--color-secondary);
+/* Gradient CTA endpoints (sparingly — partner/premium only) */
+--color-gradient-from:var(--color-primary);
+--color-gradient-to:var(--color-secondary);
+--gradient-cta:linear-gradient(104deg,var(--color-gradient-from) 0%,var(--color-gradient-to) 100%);
+
+/* Tint scale — color at 5 / 10 / 20 % over the target surface */
+--primary-5:color-mix(in srgb,var(--color-primary) 5%,transparent);
+--primary-10:color-mix(in srgb,var(--color-primary) 10%,transparent);
+--primary-20:color-mix(in srgb,var(--color-primary) 20%,transparent);
+--secondary-5:color-mix(in srgb,var(--color-secondary) 5%,transparent);
+--secondary-10:color-mix(in srgb,var(--color-secondary) 10%,transparent);
+--secondary-20:color-mix(in srgb,var(--color-secondary) 20%,transparent);
+--danger-5:color-mix(in srgb,var(--color-danger) 5%,transparent);
+--danger-10:color-mix(in srgb,var(--color-danger) 10%,transparent);
+--danger-20:color-mix(in srgb,var(--color-danger) 20%,transparent);
+--success-5:color-mix(in srgb,var(--color-success) 5%,transparent);
+--success-10:color-mix(in srgb,var(--color-success) 10%,transparent);
+--success-20:color-mix(in srgb,var(--color-success) 20%,transparent);
+--warning-5:color-mix(in srgb,var(--color-warning) 5%,transparent);
+--warning-10:color-mix(in srgb,var(--color-warning) 10%,transparent);
+--warning-20:color-mix(in srgb,var(--color-warning) 20%,transparent);
+/* "Saturated/darker version" of a color — for text on its own tint */
+--primary-ink:color-mix(in srgb,var(--color-primary) 55%,#000);
+--secondary-ink:var(--color-secondary);
+--danger-ink:color-mix(in srgb,var(--color-danger) 70%,#000);
+--success-ink:color-mix(in srgb,var(--color-success) 55%,#000);
+--warning-ink:color-mix(in srgb,var(--color-warning) 50%,#000);
+
+/* Semantic aliases */
+--surface-page:var(--color-page-bg);
+--surface-card:var(--color-surface);
+--surface-sunken:var(--color-page-bg);
+--surface-overlay:color-mix(in srgb,var(--color-page-bg) 30%,transparent);
+--text-body:var(--color-text);
+--text-muted:var(--color-text-muted);
+--text-on-color:var(--color-white);
+--text-link:var(--color-secondary);
+--border-subtle:var(--secondary-10);
+}

@@ -2,8 +2,10 @@
 docs/referenz/*.xlsx
 docs/referenz/*.zip
 
-.claude/settings.local.json
-config/config.php
-storage/
+.claude/
+orev-konfiguration.php
+orev-einrichtungscode.php
+orev-einrichtung.lock
+daten/
 .DS_Store
 Thumbs.db
