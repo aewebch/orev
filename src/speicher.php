@@ -6,6 +6,14 @@
    Ändern (lesen, anpassen, schreiben) läuft unter einer exklusiven Sperre pro Datei. */
 
 define('OREV_KENNUNG', 'OREV1:');
+
+/* Abbruch einer Änderung mit Meldung an die Person: speicherAendern() schreibt dann nichts */
+class OrevAbbruch extends Exception {
+}
+
+function abbrechen($text) {
+  throw new OrevAbbruch($text);
+}
 define('OREV_ENDUNG', '.orev');
 
 function verschluesseln($klartext, $schluessel, $name) {
@@ -53,7 +61,7 @@ function speicherSchreiben($name, $daten) {
 }
 
 /* Liest die Datei unter Sperre, übergibt sie der Änderung (per Referenz) und schreibt sie zurück.
-   Gibt zurück, was die Änderung zurückgibt. */
+   Gibt zurück, was die Änderung zurückgibt. Ruft die Änderung abbrechen() auf, bleibt die Datei unverändert. */
 function speicherAendern($name, $standard, $aenderung) {
   $pfad = speicherPfad($name);
   if (!is_dir(dirname($pfad))) mkdir(dirname($pfad), 0700, true);

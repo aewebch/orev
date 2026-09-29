@@ -15,8 +15,11 @@ require __DIR__ . '/src/mail.php';
 require __DIR__ . '/src/migrationen.php';
 require __DIR__ . '/src/update.php';
 require __DIR__ . '/src/einrichtung.php';
+require __DIR__ . '/src/rechte.php';
+require __DIR__ . '/src/events.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
+require __DIR__ . '/src/aktionen/events.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -45,15 +48,34 @@ try {
     'person_speichern' => 'aktionPersonSpeichern',
     'einladen' => 'aktionEinladen',
     'einladung_zurueckziehen' => 'aktionEinladungZurueckziehen',
-    'admin_setzen' => 'aktionAdminSetzen',
+    'konto_rechte' => 'aktionKontoRechte',
     'konto_entfernen' => 'aktionKontoEntfernen',
     'einstellungen_lesen' => 'aktionEinstellungenLesen',
     'einstellungen_speichern' => 'aktionEinstellungenSpeichern',
     'update_pruefen' => 'aktionUpdatePruefen',
     'update_installieren' => 'aktionUpdateInstallieren',
+    'rollenvorlagen_speichern' => 'aktionRollenvorlagenSpeichern',
+    'events_liste' => 'aktionEventsListe',
+    'event_anlegen' => 'aktionEventAnlegen',
+    'event_laden' => 'aktionEventLaden',
+    'event_speichern' => 'aktionEventSpeichern',
+    'event_loeschen' => 'aktionEventLoeschen',
+    'tag_speichern' => 'aktionTagSpeichern',
+    'personen_suche' => 'aktionPersonenSuche',
+    'mitglied_hinzufuegen' => 'aktionMitgliedHinzufuegen',
+    'mitglied_entfernen' => 'aktionMitgliedEntfernen',
+    'mitglied_rollen' => 'aktionMitgliedRollen',
+    'mitglied_angaben_speichern' => 'aktionMitgliedAngabenSpeichern',
+    'mitglied_einladen' => 'aktionMitgliedEinladen',
+    'team_speichern' => 'aktionTeamSpeichern',
+    'team_loeschen' => 'aktionTeamLoeschen',
+    'rolle_speichern' => 'aktionRolleSpeichern',
+    'rolle_loeschen' => 'aktionRolleLoeschen',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();
+} catch (OrevAbbruch $e) {
+  fehler($e->getMessage());
 } catch (Throwable $e) {
   /* Details nur ins Server-Log, nie an den Browser */
   error_log('Orev: ' . $e->getMessage());

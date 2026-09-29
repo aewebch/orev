@@ -95,7 +95,7 @@ function aktionEinrichtungAbschliessen() {
       $einstellungen['schema_version'] = hoechsteMigration();
     });
     $person = neuePerson($vorname, $nachname, $kuerzel, $email);
-    $person['konto'] = neuesKonto($passwort, true);
+    $person['konto'] = neuesKonto($passwort, true, true);
     $token = sitzungAnlegen($person);
     speicherSchreiben('personen', array('personen' => array($person)));
   } finally {

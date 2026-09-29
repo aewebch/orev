@@ -44,6 +44,17 @@ function istAdmin($person) {
   return $person !== null && $person['konto'] !== null && $person['konto']['ist_admin'] === true;
 }
 
+/* Die Angaben, die die Rechteauflösung über die fragende Person braucht */
+function rechteKontext($person) {
+  return array('id' => $person['id'], 'istAdmin' => istAdmin($person));
+}
+
+/* Events anlegen: Installations-Admins immer, andere nur mit freigeschaltetem Recht am Konto */
+function darfEventsAnlegen($person) {
+  if ($person === null || $person['konto'] === null) return false;
+  return istAdmin($person) || !empty($person['konto']['darf_events_anlegen']);
+}
+
 function pflichtAdmin() {
   $person = pflichtAnmeldung();
   if (!istAdmin($person)) fehler('Nur für Installations-Admins.', 403);

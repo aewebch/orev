@@ -3,13 +3,12 @@
 
 function aktionStatus() {
   $person = angemeldetePerson();
-  $einstellungen = einstellungenLesen();
   antwort(array(
     'eingerichtet' => true,
     'version' => lokaleVersion(),
-    'name' => $einstellungen['name'],
+    'name' => einstellungenLesen()['name'],
     'ich' => $person === null ? null : personOeffentlich($person),
-    'darfEventsAnlegen' => $person !== null && (istAdmin($person) || $einstellungen['events_anlegen'] === 'alle'),
+    'darfEventsAnlegen' => darfEventsAnlegen($person),
   ));
 }
 
@@ -89,8 +88,8 @@ function aktionEinladungEinloesen() {
   $sitzung = personenAendern(function (&$personen) use ($token, $passwort) {
     $i = personIndexNachEinladung($personen, $token);
     if ($i === null) return '';
-    $istAdmin = $personen[$i]['konto'] !== null && $personen[$i]['konto']['ist_admin'];
-    $personen[$i]['konto'] = neuesKonto($passwort, $istAdmin);
+    $bisher = $personen[$i]['konto'];
+    $personen[$i]['konto'] = neuesKonto($passwort, $bisher !== null && $bisher['ist_admin'], $bisher !== null && !empty($bisher['darf_events_anlegen']));
     $personen[$i]['einladung'] = null;
     return sitzungAnlegen($personen[$i]);
   });

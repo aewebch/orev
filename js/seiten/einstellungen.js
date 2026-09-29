@@ -14,8 +14,6 @@ var SeiteEinstellungen = {
             <ae-input v-model="werte.name" label="Name der Installation" required maxlength="80"></ae-input>
             <ae-select v-model="werte.zeitzone" label="Zeitzone" :optionen="[{ wert: 'Europe/Zurich', text: 'Europe/Zurich' }]"></ae-select>
           </div>
-          <ae-select v-model="werte.eventsAnlegen" label="Wer darf Events anlegen?"
-            :optionen="[{ wert: 'admins', text: 'Nur Installations-Admins' }, { wert: 'alle', text: 'Alle Personen mit Konto' }]"></ae-select>
           <ae-checkbox v-model="werte.icalGanzesProgramm" label="Kalender-Abo: standardmässig das ganze Programm eines Events statt nur der eigenen Einträge"></ae-checkbox>
           <ae-alert v-if="meldung" :tone="fehler ? 'danger' : 'success'">{{ meldung }}</ae-alert>
           <div class="formular__aktionen"><ae-button type="submit" :disabled="laeuft">Speichern</ae-button></div>
@@ -38,12 +36,22 @@ var SeiteEinstellungen = {
             <template #trailing>
               <div class="reihe">
                 <ae-badge v-if="p.istAdmin" color="secondary" variant="solid">Admin</ae-badge>
+                <ae-badge v-else-if="p.darfEventsAnlegen" color="secondary">Events anlegen</ae-badge>
                 <ae-badge v-if="p.hatKonto" color="success">Konto</ae-badge>
                 <ae-badge v-else-if="p.eingeladenBis" color="warning">Eingeladen</ae-badge>
                 <ae-badge v-else color="neutral">Ohne Konto</ae-badge>
               </div>
             </template>
           </ae-card-row>
+        </ae-card>
+
+        <ae-card v-if="tab === 'vorlagen' && werte" subtitle="Neue Events übernehmen diese Rollen. Bestehende Events ändern sich dadurch nicht.">
+          <template #actions><ae-button variant="secondary" icon="plus" @click="vorlageOeffnen(-1)">Vorlage anlegen</ae-button></template>
+          <ae-card-row v-for="(v, i) in werte.rollenvorlagen" :key="v.id" :title="v.name" :meta="vorlageMeta(v)" interaktiv @click="vorlageOeffnen(i)">
+            <template #leading><ae-avatar :name="v.name" :size="40"></ae-avatar></template>
+          </ae-card-row>
+          <p v-if="!werte.rollenvorlagen.length" class="leer">Keine Vorlagen. Neue Events haben dann nur die Rolle Event-Leitung.</p>
+          <ae-alert v-if="meldung" :tone="fehler ? 'danger' : 'success'">{{ meldung }}</ae-alert>
         </ae-card>
 
         <ae-card v-if="tab === 'updates'">
@@ -84,7 +92,19 @@ var SeiteEinstellungen = {
         </ae-card>
       </div>
 
-      <ae-modal v-if="person" :title="person.id ? person.vorname + ' ' + person.name : 'Person erfassen'" @schliessen="person = null">
+      <ae-modal v-if="vorlage" :title="vorlage.id ? vorlage.name : 'Vorlage anlegen'" :width="640" @schliessen="vorlage = null">
+        <form id="vorlage-formular" class="formular" @submit.prevent="vorlageSpeichern">
+          <ae-input v-model="vorlage.name" label="Name" required maxlength="80" placeholder="z. B. Küche"></ae-input>
+          <rechte-matrix v-model="vorlage.rechte"></rechte-matrix>
+          <div v-if="vorlage.index >= 0" class="reihe"><ae-button variant="tertiary" icon="trash-2" @click="vorlageLoeschen">Vorlage löschen</ae-button></div>
+        </form>
+        <template #footer>
+          <ae-button variant="tertiary" @click="vorlage = null">Schliessen</ae-button>
+          <ae-button type="submit" form="vorlage-formular" size="md">Speichern</ae-button>
+        </template>
+      </ae-modal>
+
+      <ae-modal v-if="person":title="person.id ? person.vorname + ' ' + person.name : 'Person erfassen'" @schliessen="person = null">
         <form id="person-formular" class="formular" @submit.prevent="personSpeichern">
           <div class="formular__zeile">
             <ae-input v-model="person.vorname" label="Vorname" required maxlength="80"></ae-input>
@@ -95,7 +115,10 @@ var SeiteEinstellungen = {
             <ae-input v-model="person.email" label="E-Mail" type="email" icon="mail"></ae-input>
           </div>
           <template v-if="person.id">
-            <ae-checkbox v-if="person.hatKonto" v-model="person.istAdmin" label="Installations-Admin" :disabled="person.id === zustand.ich.id" @update:modelValue="adminSetzen"></ae-checkbox>
+            <div v-if="person.hatKonto" class="stapel stapel--eng">
+              <ae-checkbox v-model="person.istAdmin" label="Installations-Admin: verwaltet die Installation und hat in jedem Event alle Rechte" :disabled="person.id === zustand.ich.id" @update:modelValue="kontoRechteSetzen"></ae-checkbox>
+              <ae-checkbox v-model="person.darfEventsAnlegen" label="Darf Events anlegen" :disabled="person.istAdmin" @update:modelValue="kontoRechteSetzen"></ae-checkbox>
+            </div>
             <div v-if="einladungsLink" class="stapel stapel--eng">
               <span class="klein">{{ einladungGesendet ? 'Die Einladung wurde per E-Mail versendet. Link zum Weitergeben:' : 'Einladungslink (7 Tage gültig, nur einmal verwendbar):' }}</span>
               <div class="code">{{ einladungsLink }}</div>
@@ -123,6 +146,7 @@ var SeiteEinstellungen = {
       tabs: [
         { id: 'allgemein', label: 'Allgemein', icon: 'settings' },
         { id: 'benutzer', label: 'Benutzer und Einladungen', icon: 'users' },
+        { id: 'vorlagen', label: 'Rollenvorlagen', icon: 'shield-check' },
         { id: 'mail', label: 'E-Mail', icon: 'mail' },
         { id: 'updates', label: 'Version und Updates', icon: 'refresh-cw' },
       ],
@@ -139,6 +163,7 @@ var SeiteEinstellungen = {
       kopiert: false,
       stand: null,
       updateMeldung: '',
+      vorlage: null,
     }
   },
   watch: {
@@ -172,6 +197,39 @@ var SeiteEinstellungen = {
         if (this.tab === 'updates') this.updateMeldung = fehler.message
       }
       this.laeuft = false
+    },
+    vorlageMeta(v) {
+      return BEREICHE.filter(function (b) { return v.rechte.some(function (r) { return r.bereich === b.id }) }).map(function (b) {
+        return b.label + ': ' + (v.rechte.find(function (r) { return r.bereich === b.id }).stufe === 2 ? 'bearbeiten' : 'lesen')
+      }).join(' · ') || 'Keine Rechte'
+    },
+    vorlageOeffnen(index) {
+      this.meldung = ''
+      var v = index >= 0 ? this.werte.rollenvorlagen[index] : { id: '', name: '', rechte: [] }
+      this.vorlage = { index: index, id: v.id, name: v.name, rechte: v.rechte.map(function (r) { return Object.assign({}, r) }) }
+    },
+    async vorlagenSpeichern(vorlagen) {
+      try {
+        this.werte = (await api.anfrage('rollenvorlagen_speichern', { rollenvorlagen: vorlagen })).einstellungen
+        this.fehler = false
+        this.meldung = 'Gespeichert.'
+        this.vorlage = null
+      } catch (fehler) {
+        this.fehler = true
+        this.meldung = fehler.message
+      }
+    },
+    vorlageSpeichern() {
+      var vorlagen = this.werte.rollenvorlagen.slice()
+      var neu = { id: this.vorlage.id, name: this.vorlage.name, rechte: this.vorlage.rechte }
+      if (this.vorlage.index >= 0) vorlagen[this.vorlage.index] = neu
+      else vorlagen.push(neu)
+      this.vorlagenSpeichern(vorlagen)
+    },
+    vorlageLoeschen() {
+      if (!confirm('Vorlage «' + this.vorlage.name + '» löschen?')) return
+      var index = this.vorlage.index
+      this.vorlagenSpeichern(this.werte.rollenvorlagen.filter(function (v, i) { return i !== index }))
     },
     async tokenEntfernen() {
       this.githubToken = ''
@@ -220,15 +278,19 @@ var SeiteEinstellungen = {
       this.person.eingeladenBis = ''
       this.personenLaden()
     },
-    async adminSetzen(wert) {
+    async kontoRechteSetzen() {
       this.personFehler = ''
       try {
-        await api.anfrage('admin_setzen', { id: this.person.id, istAdmin: wert })
-        this.personenLaden()
+        await api.anfrage('konto_rechte', { id: this.person.id, istAdmin: this.person.istAdmin, darfEventsAnlegen: this.person.darfEventsAnlegen })
+        if (this.person.id === zustand.ich.id) await api.statusLaden()
       } catch (fehler) {
-        this.person.istAdmin = !wert
         this.personFehler = fehler.message
       }
+      await this.personenLaden()
+      var id = this.person.id
+      var aktuell = this.personen.find(function (p) { return p.id === id })
+      this.person.istAdmin = aktuell.istAdmin
+      this.person.darfEventsAnlegen = aktuell.darfEventsAnlegen
     },
     async kontoEntfernen() {
       if (!confirm('Konto entfernen? Die Person bleibt im Verzeichnis, kann sich aber nicht mehr anmelden.')) return

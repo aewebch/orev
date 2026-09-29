@@ -11,6 +11,8 @@ require dirname(__DIR__) . '/src/sicherheit.php';
 require dirname(__DIR__) . '/src/personen.php';
 require dirname(__DIR__) . '/src/einstellungen.php';
 require dirname(__DIR__) . '/src/update.php';
+require dirname(__DIR__) . '/src/rechte.php';
+require dirname(__DIR__) . '/src/events.php';
 
 $fehlgeschlagen = array();
 $anzahl = 0;

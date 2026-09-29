@@ -44,10 +44,11 @@ function neuePerson($vorname, $name, $kuerzel, $email) {
   );
 }
 
-function neuesKonto($passwort, $istAdmin) {
+function neuesKonto($passwort, $istAdmin, $darfEventsAnlegen) {
   return array(
     'passwort_hash' => passwortHash($passwort),
     'ist_admin' => $istAdmin,
+    'darf_events_anlegen' => $darfEventsAnlegen,
     'erstellt_am' => jetzt(),
     'letzte_anmeldung' => '',
     'sitzungen' => array(),
@@ -76,6 +77,7 @@ function personOeffentlich($person) {
     'email' => $person['email'],
     'hatKonto' => $person['konto'] !== null,
     'istAdmin' => $person['konto'] !== null && $person['konto']['ist_admin'],
+    'darfEventsAnlegen' => $person['konto'] !== null && !empty($person['konto']['darf_events_anlegen']),
     'letzteAnmeldung' => $person['konto'] !== null ? $person['konto']['letzte_anmeldung'] : '',
     'eingeladenBis' => $person['einladung'] !== null ? $person['einladung']['gueltig_bis'] : '',
   );

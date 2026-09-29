@@ -31,18 +31,17 @@ function aktionPersonSpeichern() {
   $ergebnis = personenAendern(function (&$personen) use ($id, $felder) {
     $gleicheEmail = $felder['email'] !== '' ? personIndexNachEmail($personen, $felder['email']) : null;
     if ($id === '') {
-      if ($gleicheEmail !== null) return 'Es gibt bereits eine Person mit dieser E-Mail-Adresse.';
+      if ($gleicheEmail !== null) abbrechen('Es gibt bereits eine Person mit dieser E-Mail-Adresse.');
       $personen[] = neuePerson($felder['vorname'], $felder['name'], $felder['kuerzel'], $felder['email']);
       return personOeffentlich($personen[count($personen) - 1]);
     }
     $i = personIndex($personen, $id);
-    if ($i === null) return 'Person nicht gefunden.';
-    if ($gleicheEmail !== null && $gleicheEmail !== $i) return 'Es gibt bereits eine Person mit dieser E-Mail-Adresse.';
-    if ($personen[$i]['konto'] !== null && $felder['email'] === '') return 'Personen mit Konto brauchen eine E-Mail-Adresse.';
+    if ($i === null) abbrechen('Person nicht gefunden.');
+    if ($gleicheEmail !== null && $gleicheEmail !== $i) abbrechen('Es gibt bereits eine Person mit dieser E-Mail-Adresse.');
+    if ($personen[$i]['konto'] !== null && $felder['email'] === '') abbrechen('Personen mit Konto brauchen eine E-Mail-Adresse.');
     $personen[$i] = array_merge($personen[$i], $felder);
     return personOeffentlich($personen[$i]);
   });
-  if (is_string($ergebnis)) fehler($ergebnis);
   antwort(array('person' => $ergebnis));
 }
 
@@ -54,12 +53,11 @@ function aktionEinladen() {
   $ergebnis = personenAendern(function (&$personen) use ($id) {
     $i = personIndex($personen, $id);
     if ($i === null) return null;
-    if ($personen[$i]['email'] === '') return 'Für eine Einladung braucht die Person eine E-Mail-Adresse.';
+    if ($personen[$i]['email'] === '') abbrechen('Für eine Einladung braucht die Person eine E-Mail-Adresse.');
     $token = einladungAnlegen($personen[$i]);
     return array('person' => $personen[$i], 'link' => einladungsLink($token));
   });
   if ($ergebnis === null) fehler('Person nicht gefunden.', 404);
-  if (is_string($ergebnis)) fehler($ergebnis);
   $gesendet = einladungSenden($ergebnis['person'], $ergebnis['link']);
   antwort(array('link' => $ergebnis['link'], 'gesendet' => $gesendet, 'person' => personOeffentlich($ergebnis['person'])));
 }
@@ -83,20 +81,21 @@ function anzahlAdmins($personen) {
   return $anzahl;
 }
 
-function aktionAdminSetzen() {
+/* Rechte eines Kontos: Installations-Admin (darf alles, in jedem Event) und Events anlegen */
+function aktionKontoRechte() {
   nurPost();
   $ich = pflichtAdmin();
   $id = (string) feld('id');
   $admin = feld('istAdmin') === true;
-  $meldung = personenAendern(function (&$personen) use ($id, $admin, $ich) {
+  $eventsAnlegen = feld('darfEventsAnlegen') === true;
+  personenAendern(function (&$personen) use ($id, $admin, $eventsAnlegen, $ich) {
     $i = personIndex($personen, $id);
-    if ($i === null || $personen[$i]['konto'] === null) return 'Diese Person hat kein Konto.';
-    if (!$admin && $id === $ich['id']) return 'Sie können sich die Admin-Rechte nicht selbst entziehen.';
+    if ($i === null || $personen[$i]['konto'] === null) abbrechen('Diese Person hat kein Konto.');
+    if (!$admin && $id === $ich['id']) abbrechen('Sie können sich die Admin-Rechte nicht selbst entziehen.');
     $personen[$i]['konto']['ist_admin'] = $admin;
-    if (anzahlAdmins($personen) === 0) return 'Es muss mindestens einen Installations-Admin geben.';
-    return '';
+    $personen[$i]['konto']['darf_events_anlegen'] = $eventsAnlegen;
+    if (anzahlAdmins($personen) === 0) abbrechen('Es muss mindestens einen Installations-Admin geben.');
   });
-  if ($meldung !== '') fehler($meldung);
   antwort(array('ok' => true));
 }
 
@@ -126,7 +125,6 @@ function aktionEinstellungenSpeichern() {
   $werte = array(
     'name' => (string) feld('name'),
     'zeitzone' => (string) feld('zeitzone', 'Europe/Zurich'),
-    'events_anlegen' => feld('eventsAnlegen') === 'alle' ? 'alle' : 'admins',
     'ical_ganzes_programm' => feld('icalGanzesProgramm') === true,
     'mail_aktiv' => feld('mailAktiv') === true,
     'mail_absender' => (string) feld('mailAbsender'),

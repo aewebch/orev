@@ -54,7 +54,44 @@
 .pruefung--fehlt{color:var(--danger-ink)}
 .pruefung--warnung{color:var(--warning-ink)}
 
+/* Event: Kopf, Navigation nach Phasen (links), Inhalt (rechts) */
+.event{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px;align-items:start}
+.event__nav{position:sticky;top:88px;display:flex;flex-direction:column;gap:4px}
+.event__phase{font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:var(--tracking-button);color:var(--color-text-muted);padding:16px 12px 4px}
+.event__phase:first-child{padding-top:0}
+.event__inhalt{display:flex;flex-direction:column;gap:24px;min-width:0}
+
+/* Rechte-Matrix: Bereich × Stufe als Segmentschalter */
+.rechte{display:flex;flex-direction:column}
+.rechte__zeile{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:var(--border-default);flex-wrap:wrap}
+.rechte__zeile:last-child{border-bottom:0}
+.stufen{display:inline-flex;background:var(--color-page-bg);border-radius:var(--radius-lg);padding:3px;gap:2px}
+.stufe{border:0;background:transparent;cursor:pointer;padding:6px 12px;border-radius:var(--radius-md);font-size:var(--text-small);color:var(--color-text-muted);transition:var(--transition)}
+.stufe:hover{color:var(--color-text);background:var(--secondary-5)}
+.stufe--aktiv,.stufe--aktiv:hover{background:var(--color-surface);color:var(--color-secondary);font-weight:var(--weight-bold);box-shadow:var(--shadow-ring)}
+.stufe:disabled{cursor:default}
+
+/* Auswahl mehrerer Personen (Chips) */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:0;cursor:pointer;padding:6px 12px;border-radius:var(--radius-pill);background:var(--color-page-bg);color:var(--color-text);font-size:var(--text-small);transition:var(--transition)}
+.chip:hover{background:var(--secondary-10)}
+.chip--aktiv,.chip--aktiv:hover{background:var(--color-secondary);color:var(--color-white)}
+
+/* Tage eines Events */
+.tag{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:start;padding:16px 0;border-bottom:var(--border-default)}
+.tag:last-child{border-bottom:0}
+.tag__datum{font-weight:var(--weight-bold);font-size:var(--text-label)}
+.tag__wochentag{display:block;font-size:var(--text-caption);font-weight:var(--weight-regular);color:var(--color-text-muted);text-transform:uppercase}
+
+@media (max-width:900px){
+  .event{grid-template-columns:minmax(0,1fr)}
+  .event__nav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:4px}
+  .event__nav .ae-nav{width:auto;flex:none;white-space:nowrap}
+  .event__phase{display:none}
+}
+
 @media (max-width:640px){
+  .tag{grid-template-columns:minmax(0,1fr);gap:8px}
   .seite{padding:16px 16px 64px}
   .ae-card{padding:16px}
   .ae-row{padding:12px 16px;margin:0 -16px}

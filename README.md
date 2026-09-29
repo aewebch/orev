@@ -33,6 +33,16 @@ Orev braucht nur ein PHP-Hosting (PHP 7.2 oder neuer mit `openssl` und `mbstring
   und den Datenordner selbst sperren (`location ~ ^/(src|migrationen|tests|docs|daten)/ { deny all; }`).
 - Orev nur über HTTPS betreiben.
 
+## Rechte
+
+- **Installations-Admin:** verwaltet die Installation und hat in jedem Event alle Rechte.
+- **Events anlegen:** pro Konto freischaltbar (Einstellungen → Benutzer und Einladungen). Wer ein Event anlegt, wird
+  dessen Event-Leitung.
+- **Event-Leitung:** Vollzugriff im Event, vergibt und definiert Rollen. Mindestens eine Person bleibt Event-Leitung.
+- **Rollen:** pro Bereich keine, lesen oder bearbeiten; für Programm, Ablaufpläne, Aufgaben und Material auch pro
+  Programmpunkt. Bei mehreren Rollen gilt pro Bereich das höchste Recht.
+- **Team-Leitung:** verwaltet das eigene Team und bearbeitet, was dem Team zugewiesen ist.
+
 ## Updates
 
 In den Einstellungen unter «Version und Updates» prüft Orev, ob auf GitHub ein neueres Release vorliegt, und installiert
