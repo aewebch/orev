@@ -26,6 +26,13 @@ function eventFelderPruefen() {
   return $felder;
 }
 
+function personNameText($personId) {
+  $i = personIndex(personenLesen(), $personId);
+  if ($i === null) return 'eine Person';
+  $p = personenLesen()[$i];
+  return trim($p['vorname'] . ' ' . $p['name']);
+}
+
 function eventAntwort($eventId, $person) {
   $event = eventLesen($eventId);
   antwort(array('event' => eventOeffentlich($event, rechteKontext($person), personenLesen())));
@@ -70,6 +77,7 @@ function aktionEventSpeichern() {
     $event = array_merge($event, $felder);
     $event['tage'] = eventTageErzeugen($felder['start_datum'], $felder['end_datum'], $event['tage']);
   });
+  benachrichtigen(eventLesen($id), $ich, array('schluessel' => 'event-' . $id, 'text' => 'hat die Angaben des Events geändert', 'link' => '/event/' . $id, 'sichtbar' => sichtbarFuerAlle()));
   eventAntwort($id, $ich);
 }
 
@@ -77,8 +85,11 @@ function aktionEventLoeschen() {
   nurPost();
   $ich = pflichtAnmeldung();
   $id = eventIdAusEingabe();
-  pflichtEventLeitung(eventFuerMitglied($id, $ich), $ich);
+  $event = eventFuerMitglied($id, $ich);
+  pflichtEventLeitung($event, $ich);
   speicherLoeschen('events/' . $id);
+  $alle = array_map(function ($m) { return $m['person_id']; }, $event['mitglieder']);
+  benachrichtigen($event, $ich, array('schluessel' => 'event-' . $id, 'text' => 'hat das Event «' . $event['titel'] . '» gelöscht', 'link' => '/', 'auch' => $alle));
   antwort(array('ok' => true));
 }
 
@@ -103,6 +114,17 @@ function aktionTagSpeichern() {
       $event['tage'][$i]['verantwortliche'] = array_values(array_unique($verantwortliche));
     }
   });
+  $vorher = array();
+  foreach ($event['tage'] as $tag) {
+    if ($tag['datum'] === $datum) $vorher = $tag['verantwortliche'];
+  }
+  benachrichtigen(eventLesen($id), $ich, array(
+    'schluessel' => 'tag-' . $datum,
+    'text' => 'hat Thema oder Tagesverantwortung am ' . substr(zeitpunktText($datum . 'T00:00'), 0, -7) . ' geändert',
+    'link' => '/event/' . $id,
+    'persoenlich' => array_merge($vorher, $verantwortliche),
+    'sichtbar' => sichtbarFuerAlle(),
+  ));
   eventAntwort($id, $ich);
 }
 
@@ -155,6 +177,15 @@ function aktionMitgliedHinzufuegen() {
   eventAendern($id, function (&$event) use ($personId, $rollen) {
     if (mitgliedVon($event, $personId) === null) $event['mitglieder'][] = array('person_id' => $personId, 'rollen' => array_values(array_unique($rollen)), 'farbe' => '');
   });
+  $nachher = eventLesen($id);
+  benachrichtigen($nachher, $ich, array(
+    'schluessel' => 'mitglied-' . $personId,
+    'text' => 'hat ' . personNameText($personId) . ' ins Event aufgenommen',
+    'textPersoenlich' => 'hat Sie ins Event «' . $nachher['titel'] . '» aufgenommen',
+    'link' => '/event/' . $id,
+    'persoenlich' => array($personId),
+    'sichtbar' => sichtbarMitRecht($nachher, 'personen'),
+  ));
   eventAntwort($id, $ich);
 }
 
@@ -177,6 +208,14 @@ function aktionMitgliedEntfernen() {
     }
     personAusProgrammEntfernen($event, $personId);
   });
+  benachrichtigen($event, $ich, array(
+    'schluessel' => 'mitglied-' . $personId,
+    'text' => 'hat ' . personNameText($personId) . ' aus dem Event entfernt',
+    'textPersoenlich' => 'hat Sie aus dem Event «' . $event['titel'] . '» entfernt',
+    'link' => '/',
+    'auch' => array($personId),
+    'sichtbar' => sichtbarMitRecht($event, 'personen'),
+  ));
   eventAntwort($id, $ich);
 }
 
@@ -202,6 +241,16 @@ function aktionMitgliedRollen() {
     if (!$gefunden) abbrechen('Person gehört nicht zum Event.');
     if (anzahlEventLeitungen($event) === 0) abbrechen('Mindestens eine Person muss Event-Leitung bleiben.');
   });
+  $nachher = eventLesen($id);
+  $namen = array_map(function ($r) { return $r['name']; }, rollenVon($nachher, $personId));
+  benachrichtigen($nachher, $ich, array(
+    'schluessel' => 'rollen-' . $personId,
+    'text' => 'hat die Rollen von ' . personNameText($personId) . ' geändert',
+    'textPersoenlich' => 'hat Ihre Rollen geändert: ' . ($namen ? implode(', ', $namen) : 'keine'),
+    'link' => '/event/' . $id,
+    'persoenlich' => array($personId),
+    'sichtbar' => sichtbarMitRecht($nachher, 'personen'),
+  ));
   eventAntwort($id, $ich);
 }
 
@@ -301,6 +350,19 @@ function aktionTeamSpeichern() {
       $event['teams'][$i]['mitglieder'] = array_values($mitglieder);
     }
   });
+  $vorher = array();
+  foreach ($event['teams'] as $team) {
+    if ($team['id'] === $teamId) $vorher = array_map(function ($m) { return $m['person_id']; }, $team['mitglieder']);
+  }
+  $nachher = eventLesen($id);
+  benachrichtigen($nachher, $ich, array(
+    'schluessel' => 'team-' . ($teamId !== '' ? $teamId : $name),
+    'text' => 'hat das Team «' . $name . '» ' . ($teamId === '' ? 'angelegt' : 'geändert'),
+    'textPersoenlich' => 'hat das Team «' . $name . '» ' . ($teamId === '' ? 'angelegt' : 'geändert') . ', dem Sie angehören oder angehörten',
+    'link' => '/event/' . $id . '/personen',
+    'persoenlich' => array_merge($vorher, array_keys($mitglieder)),
+    'sichtbar' => sichtbarMitRecht($nachher, 'personen'),
+  ));
   eventAntwort($id, $ich);
 }
 
@@ -308,12 +370,23 @@ function aktionTeamLoeschen() {
   nurPost();
   $ich = pflichtAnmeldung();
   $id = eventIdAusEingabe();
-  pflichtRecht(eventFuerMitglied($id, $ich), $ich, 'personen', RECHT_BEARBEITEN);
+  $event = eventFuerMitglied($id, $ich);
+  pflichtRecht($event, $ich, 'personen', RECHT_BEARBEITEN);
   $teamId = (string) feld('teamId');
   eventAendern($id, function (&$event) use ($teamId) {
     $event['teams'] = array_values(array_filter($event['teams'], function ($t) use ($teamId) { return $t['id'] !== $teamId; }));
     teamAusProgrammEntfernen($event, $teamId);
   });
+  foreach ($event['teams'] as $team) {
+    if ($team['id'] !== $teamId) continue;
+    benachrichtigen($event, $ich, array(
+      'schluessel' => 'team-' . $teamId,
+      'text' => 'hat das Team «' . $team['name'] . '» gelöscht',
+      'link' => '/event/' . $id . '/personen',
+      'teams' => array($teamId),
+      'sichtbar' => sichtbarMitRecht($event, 'personen'),
+    ));
+  }
   eventAntwort($id, $ich);
 }
 
@@ -342,15 +415,36 @@ function aktionRolleSpeichern() {
       if (!$rolle['ist_event_leitung']) $event['rollen'][$i]['rechte'] = $rechte;
     }
   });
+  rolleMelden(eventLesen($id), $ich, $rolleId, 'hat die Rolle «' . $name . '» ' . ($rolleId === '' ? 'angelegt' : 'geändert'));
   eventAntwort($id, $ich);
+}
+
+/* Wer die Rolle hat, ist persönlich betroffen (seine Rechte ändern sich) */
+function rolleMelden($event, $ich, $rolleId, $text) {
+  $betroffen = array();
+  foreach ($event['mitglieder'] as $m) {
+    if (in_array($rolleId, $m['rollen'], true)) $betroffen[] = $m['person_id'];
+  }
+  benachrichtigen($event, $ich, array(
+    'schluessel' => 'rolle-' . $rolleId,
+    'text' => $text,
+    'textPersoenlich' => $text . ' (eine Ihrer Rollen)',
+    'link' => '/event/' . $event['id'] . '/rollen',
+    'persoenlich' => $betroffen,
+    'sichtbar' => sichtbarMitRecht($event, 'personen'),
+  ));
 }
 
 function aktionRolleLoeschen() {
   nurPost();
   $ich = pflichtAnmeldung();
   $id = eventIdAusEingabe();
-  pflichtEventLeitung(eventFuerMitglied($id, $ich), $ich);
+  $event = eventFuerMitglied($id, $ich);
+  pflichtEventLeitung($event, $ich);
   $rolleId = (string) feld('rolleId');
+  foreach ($event['rollen'] as $rolle) {
+    if ($rolle['id'] === $rolleId) rolleMelden($event, $ich, $rolleId, 'hat die Rolle «' . $rolle['name'] . '» gelöscht');
+  }
   eventAendern($id, function (&$event) use ($rolleId) {
     foreach ($event['rollen'] as $rolle) {
       if ($rolle['id'] === $rolleId && $rolle['ist_event_leitung']) abbrechen('Die Rolle Event-Leitung lässt sich nicht löschen.');

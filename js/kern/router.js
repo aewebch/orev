@@ -7,6 +7,8 @@ var router = VueRouter.createRouter({
     { path: '/einladung/:token', component: SeiteEinladung, props: true, meta: { oeffentlich: true } },
     { path: '/', component: SeiteDashboard },
     { path: '/konto', component: SeiteKonto },
+    { path: '/mitteilungen', component: SeiteMitteilungen },
+    { path: '/aufgaben', component: SeiteMeineAufgaben },
     { path: '/event/:id/:bereich?/:punktId?', component: SeiteEvent, props: true },
     { path: '/einstellungen', component: SeiteEinstellungen, meta: { admin: true } },
     { path: '/:pfad(.*)*', redirect: '/' },

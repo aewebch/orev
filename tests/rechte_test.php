@@ -36,6 +36,8 @@ function testEvent() {
       array('id' => 'y', 'teams' => array()),
       array('id' => 'zmorge', 'teams' => array('t-kueche')),
     ),
+    'aufgaben' => array(),
+    'material' => array(),
   );
 }
 

@@ -23,6 +23,29 @@ function ablaufAendern($id, $punktId, $aenderung) {
   });
 }
 
+/* Leitung des Plans und die im Schritt Eingetragenen persönlich, alle mit Leserecht auf den Plan allgemein.
+   Mehrere Änderungen am selben Plan innert einer Stunde ergeben eine Meldung. */
+function ablaufMelden($id, $ich, $punktId, $text, $personen, $teams) {
+  $event = eventLesen($id);
+  $i = programmpunktIndex($event, $punktId);
+  if ($i === null) return;
+  $punkt = $event['programmpunkte'][$i];
+  benachrichtigen($event, $ich, array(
+    'schluessel' => 'ablauf-' . $punktId,
+    'text' => $text . ' im Ablaufplan von ' . punktText($punkt),
+    'link' => '/event/' . $id . '/ablauf/' . $punktId,
+    'persoenlich' => array_merge($punkt['ablauf']['leitung'], $personen),
+    'teams' => $teams,
+    'sichtbar' => sichtbarMitRecht($event, 'ablauf', $punktId),
+  ));
+}
+
+function schrittVon($event, $punktId, $schrittId) {
+  $punkt = $event['programmpunkte'][programmpunktIndex($event, $punktId)];
+  $s = ablaufschrittIndex($punkt, $schrittId);
+  return $s === null ? null : $punkt['ablauf']['schritte'][$s];
+}
+
 function aktionAblaufKopfSpeichern() {
   nurPost();
   $ich = pflichtAnmeldung();
@@ -34,6 +57,8 @@ function aktionAblaufKopfSpeichern() {
     $ablauf['leitung'] = $leitung;
     $ablauf['ziele'] = $ziele;
   });
+  $vorher = $event['programmpunkte'][programmpunktIndex($event, $punktId)]['ablauf']['leitung'];
+  ablaufMelden($id, $ich, $punktId, 'hat Leitung oder Ziele geändert', $vorher, array());
   eventAntwort($id, $ich);
 }
 
@@ -83,6 +108,10 @@ function aktionAblaufschrittSpeichern() {
     }
     abbrechen('Ablaufschritt nicht gefunden.');
   });
+  $alt = $schrittId === '' ? null : schrittVon($event, $punktId, $schrittId);
+  ablaufMelden($id, $ich, $punktId, ($alt ? 'hat den Schritt «' . $felder['titel'] . '» geändert' : 'hat den Schritt «' . $felder['titel'] . '» ergänzt'),
+    array_merge($felder['wer']['personen'], $alt ? $alt['wer']['personen'] : array()),
+    array_merge($felder['wer']['teams'], $alt ? $alt['wer']['teams'] : array()));
   eventAntwort($id, $ich);
 }
 
@@ -109,10 +138,19 @@ function aktionAblaufschrittVerschieben() {
 function aktionAblaufschrittLoeschen() {
   nurPost();
   $ich = pflichtAnmeldung();
-  list($id, , $punktId) = ablaufPunktPruefen($ich);
+  list($id, $event, $punktId) = ablaufPunktPruefen($ich);
   $schrittId = (string) feld('id');
-  ablaufAendern($id, $punktId, function (&$ablauf) use ($schrittId) {
-    $ablauf['schritte'] = array_values(array_filter($ablauf['schritte'], function ($s) use ($schrittId) { return $s['id'] !== $schrittId; }));
+  $alt = schrittVon($event, $punktId, $schrittId);
+  if ($alt === null) fehler('Ablaufschritt nicht gefunden.', 404);
+  /* Schritt und alles, was daran hängt (Aufgaben, Material), in einem Schreibvorgang entfernen */
+  eventAendern($id, function (&$event) use ($punktId, $schrittId) {
+    $i = programmpunktIndex($event, $punktId);
+    if ($i === null) abbrechen('Programmpunkt nicht gefunden.');
+    $event['programmpunkte'][$i]['ablauf']['schritte'] = array_values(array_filter($event['programmpunkte'][$i]['ablauf']['schritte'], function ($s) use ($schrittId) { return $s['id'] !== $schrittId; }));
+    $event['programmpunkte'][$i]['geaendert_am'] = jetzt();
+    $event['programmpunkte'][$i]['sequenz']++;
+    zielVerweiseEntfernen($event, 'schritt', $schrittId);
   });
+  ablaufMelden($id, $ich, $punktId, 'hat den Schritt «' . $alt['titel'] . '» gelöscht', $alt['wer']['personen'], $alt['wer']['teams']);
   eventAntwort($id, $ich);
 }

@@ -205,6 +205,7 @@ var SeiteEinstellungen = {
     },
   },
   async created() {
+    if (this.$route.query.tab && this.tabs.some(function (t) { return t.id === this.$route.query.tab }, this)) this.tab = this.$route.query.tab
     this.werte = (await api.anfrage('einstellungen_lesen')).einstellungen
   },
   methods: {

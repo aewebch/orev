@@ -8,6 +8,7 @@ var zustand = Vue.reactive({
   ich: null,
   darfEventsAnlegen: false,
   updateVerfuegbar: false,
+  ungelesen: 0,
 })
 
 var api = {

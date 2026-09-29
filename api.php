@@ -18,11 +18,16 @@ require __DIR__ . '/src/einrichtung.php';
 require __DIR__ . '/src/rechte.php';
 require __DIR__ . '/src/events.php';
 require __DIR__ . '/src/programm.php';
+require __DIR__ . '/src/aufgaben.php';
+require __DIR__ . '/src/benachrichtigungen.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
 require __DIR__ . '/src/aktionen/programm.php';
 require __DIR__ . '/src/aktionen/ablauf.php';
+require __DIR__ . '/src/aktionen/aufgaben.php';
+require __DIR__ . '/src/aktionen/benachrichtigungen.php';
+require __DIR__ . '/src/aktionen/suche.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -89,6 +94,18 @@ try {
     'ablaufschritt_speichern' => 'aktionAblaufschrittSpeichern',
     'ablaufschritt_verschieben' => 'aktionAblaufschrittVerschieben',
     'ablaufschritt_loeschen' => 'aktionAblaufschrittLoeschen',
+    'aufgabe_speichern' => 'aktionAufgabeSpeichern',
+    'aufgabe_status' => 'aktionAufgabeStatus',
+    'aufgabe_loeschen' => 'aktionAufgabeLoeschen',
+    'material_speichern' => 'aktionMaterialSpeichern',
+    'material_loeschen' => 'aktionMaterialLoeschen',
+    'material_gesamtliste' => 'aktionMaterialGesamtliste',
+    'benachrichtigungen_liste' => 'aktionBenachrichtigungenListe',
+    'benachrichtigungen_anzahl' => 'aktionBenachrichtigungenAnzahl',
+    'benachrichtigungen_gelesen' => 'aktionBenachrichtigungenGelesen',
+    'benachrichtigungen_leeren' => 'aktionBenachrichtigungenLeeren',
+    'suche' => 'aktionSuche',
+    'meine_aufgaben' => 'aktionMeineAufgaben',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();

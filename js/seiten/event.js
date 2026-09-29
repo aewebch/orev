@@ -1,11 +1,14 @@
-/* Event: Kopf, Navigation nach den drei Phasen, darunter der gewählte Bereich.
+/* Event: Kopf, Tabs nach den drei Phasen (durch einen Abstand getrennt), darunter der gewählte Bereich auf einer Fläche.
+   Ohne gewählten Bereich öffnet ein eingerichtetes Event (mit Programmpunkten) das Programm, sonst die Übersicht.
    Die Bereiche erhalten das Event als Prop und ändern es über eventAktion() (provide/inject);
    jede Antwort des Servers liefert das Event in der Sicht der angemeldeten Person zurück. */
 var EVENT_NAVIGATION = [
   { phase: 'Konzept und Vorbereitung', bereiche: [
-    { id: 'uebersicht', label: 'Übersicht und Tage', icon: 'info', recht: 'stammdaten', komponente: 'event-uebersicht' },
-    { id: 'personen', label: 'Personen und Teams', icon: 'users', recht: 'personen', komponente: 'event-personen' },
-    { id: 'rollen', label: 'Rollen und Rechte', icon: 'shield-check', recht: 'personen', komponente: 'event-rollen' },
+    { id: 'uebersicht', label: 'Übersicht und Tage', kurz: 'Übersicht', icon: 'info', recht: 'stammdaten', komponente: 'event-uebersicht' },
+    { id: 'personen', label: 'Personen und Teams', kurz: 'Personen', icon: 'users', recht: 'personen', komponente: 'event-personen' },
+    { id: 'rollen', label: 'Rollen und Rechte', kurz: 'Rollen', icon: 'shield-check', recht: 'personen', komponente: 'event-rollen' },
+    { id: 'aufgaben', label: 'Aufgaben', icon: 'list-todo', recht: 'aufgaben', komponente: 'event-aufgaben' },
+    { id: 'material', label: 'Material', icon: 'package', recht: 'material', komponente: 'event-material' },
   ] },
   { phase: 'Durchführung', bereiche: [
     { id: 'programm', label: 'Programm', icon: 'calendar-days', recht: 'programm', komponente: 'event-programm' },
@@ -14,7 +17,7 @@ var EVENT_NAVIGATION = [
 ]
 
 var SeiteEvent = {
-  props: { id: { type: String, required: true }, bereich: { type: String, default: 'uebersicht' }, punktId: { type: String, default: '' } },
+  props: { id: { type: String, required: true }, bereich: { type: String, default: '' }, punktId: { type: String, default: '' } },
   template: `
     <main class="seite">
       <ae-card v-if="!event && fehler" padding="even"><ae-alert tone="danger">{{ fehler }}</ae-alert></ae-card>
@@ -31,15 +34,20 @@ var SeiteEvent = {
           </div>
         </div>
         <div class="event">
-          <nav class="event__nav nicht-drucken" aria-label="Bereiche des Events">
-            <template v-for="gruppe in navigation" :key="gruppe.phase">
-              <div class="event__phase">{{ gruppe.phase }}</div>
-              <ae-nav-item v-for="b in gruppe.bereiche" :key="b.id" :icon="b.icon" :active="b.id === aktiv.id" @click="oeffnen(b.id)">{{ b.label }}</ae-nav-item>
-            </template>
+          <nav class="event-tabs nicht-drucken" aria-label="Bereiche des Events">
+            <div role="tablist" class="ae-tabs">
+              <template v-for="(gruppe, g) in navigation" :key="gruppe.phase">
+                <span v-if="g > 0" class="event-tabs__trenner" aria-hidden="true"></span>
+                <button v-for="b in gruppe.bereiche" :key="b.id" type="button" role="tab" :aria-selected="b.id === aktiv.id" :title="gruppe.phase + ': ' + b.label"
+                  :class="['ae-tab', b.id === aktiv.id ? 'ae-tab--active' : '']" @click="oeffnen(b.id)">
+                  <ae-icon :name="b.icon" :size="16"></ae-icon>{{ b.kurz || b.label }}
+                </button>
+              </template>
+            </div>
           </nav>
-          <div class="event__inhalt">
+          <div :class="['event__flaeche', aktiv.id === navigation[0].bereiche[0].id ? 'event__flaeche--erster' : '']">
             <ae-alert v-if="meldung" :tone="meldungFehler ? 'danger' : 'success'">{{ meldung }}</ae-alert>
-            <component :is="aktiv.komponente" :event="event" v-bind="aktiv.id === 'ablauf' ? { punktId: punktId } : {}"></component>
+            <component :is="aktiv.komponente" :event="event" v-bind="['ablauf', 'aufgaben'].includes(aktiv.id) ? { punktId: punktId } : {}"></component>
           </div>
         </div>
       </template>
@@ -55,13 +63,17 @@ var SeiteEvent = {
     /* Nur Bereiche, für die die Person mindestens Leserecht hat; die Übersicht sehen alle Mitglieder */
     navigation() {
       var recht = this.event.ich.recht
+      /* Zuständige und Halter sehen ihre Aufgaben und ihr Material auch ohne Recht im Bereich */
+      var aufgaben = this.event.aufgaben.length > 0
+      var material = this.event.material.length > 0
       return EVENT_NAVIGATION.map(function (gruppe) {
-        return { phase: gruppe.phase, bereiche: gruppe.bereiche.filter(function (b) { return b.id === 'uebersicht' || recht[b.recht] >= 1 }) }
+        return { phase: gruppe.phase, bereiche: gruppe.bereiche.filter(function (b) { return b.id === 'uebersicht' || recht[b.recht] >= 1 || (b.id === 'aufgaben' && aufgaben) || (b.id === 'material' && material) }) }
       }).filter(function (gruppe) { return gruppe.bereiche.length })
     },
     aktiv() {
       var alle = [].concat.apply([], this.navigation.map(function (g) { return g.bereiche }))
       var bereich = this.bereich
+      if (!bereich) bereich = this.event.programmpunkte.length && this.event.ich.recht.programm >= 1 ? 'programm' : 'uebersicht'
       return alle.find(function (b) { return b.id === bereich }) || alle[0]
     },
   },

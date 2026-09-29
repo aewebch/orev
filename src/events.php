@@ -60,6 +60,8 @@ function neuesEvent($felder, $erstellerId, $vorlagen) {
     'rollen' => $rollen,
     'programmpunkte' => array(),
     'agenda' => agendaStandard(),
+    'aufgaben' => array(),
+    'material' => array(),
   ));
 }
 
@@ -151,6 +153,9 @@ function eventOeffentlich($event, $wer, $personen) {
   }, $event['tage']);
   $sicht['programmpunkte'] = sichtbareProgrammpunkte($event, $wer);
   $sicht['agenda'] = $event['agenda'];
+  $sicht['aufgaben'] = sichtbareAufgaben($event, $wer);
+  $sicht['material'] = sichtbaresMaterial($event, $wer);
+  $sicht['materialGesamt'] = materialGesamtliste($sicht['material']);
   $sicht['personen'] = $namen;
   $sicht['teams'] = $teams;
   $sicht['mitglieder'] = array();
@@ -171,6 +176,7 @@ function eventOeffentlich($event, $wer, $personen) {
     'recht' => $recht,
     'hatLeitungsrechte' => hatLeitungsrechte($event, $wer),
     'darfProgrammAnlegen' => effektivesRecht($event, $wer, 'programm') === RECHT_BEARBEITEN,
+    'eventweit' => array('aufgaben' => effektivesRecht($event, $wer, 'aufgaben'), 'material' => effektivesRecht($event, $wer, 'material')),
     'istAdmin' => $wer['istAdmin'],
     'istMitglied' => mitgliedVon($event, $personId) !== null,
     'rollen' => array_map(function ($r) { return $r['name']; }, rollenVon($event, $personId)),

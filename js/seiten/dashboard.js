@@ -77,7 +77,13 @@ var SeiteDashboard = {
       return this.events.filter(function (e) { return e.endDatum < heute }).sort(function (a, b) { return b.startDatum.localeCompare(a.startDatum) })
     },
   },
+  watch: {
+    '$route.query.neu'(neu) {
+      if (neu && zustand.darfEventsAnlegen) this.neuOeffnen()
+    },
+  },
   async created() {
+    if (this.$route.query.neu && zustand.darfEventsAnlegen) this.neuOeffnen()
     this.events = (await api.anfrage('events_liste')).events
   },
   methods: {

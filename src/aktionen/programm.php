@@ -43,6 +43,24 @@ function programmpunktFelderPruefen($event) {
   return $felder;
 }
 
+/* Zuständige (vorher und nachher) persönlich benachrichtigen, alle mit Leserecht auf den Punkt allgemein */
+function programmMelden($event, $ich, $punkt, $vorher, $text) {
+  benachrichtigen($event, $ich, array(
+    'schluessel' => 'pgm-' . $punkt['id'],
+    'text' => $text,
+    'link' => '/event/' . $event['id'] . '/programm',
+    'persoenlich' => array_merge($punkt['personen'], $vorher ? $vorher['personen'] : array()),
+    'teams' => array_merge($punkt['teams'], $vorher ? $vorher['teams'] : array()),
+    'sichtbar' => sichtbarMitRecht($event, 'programm', $punkt['id']),
+  ));
+}
+
+function punktNachher($eventId, $punktId) {
+  $event = eventLesen($eventId);
+  $i = programmpunktIndex($event, $punktId);
+  return array($event, $i === null ? null : $event['programmpunkte'][$i]);
+}
+
 function programmpunktGeaendert(&$event, $i, $felder) {
   $event['programmpunkte'][$i] = array_merge($event['programmpunkte'][$i], $felder, array(
     'geaendert_am' => jetzt(),
@@ -63,15 +81,19 @@ function aktionProgrammpunktSpeichern() {
     pflichtRecht($event, $ich, 'programm', RECHT_BEARBEITEN, $punktId);
   }
   $felder = programmpunktFelderPruefen($event);
-  eventAendern($id, function (&$event) use ($punktId, $felder) {
+  $vorher = $punktId === '' ? null : $event['programmpunkte'][programmpunktIndex($event, $punktId)];
+  $neuId = $punktId === '' ? uuid() : $punktId;
+  eventAendern($id, function (&$event) use ($punktId, $neuId, $felder) {
     if ($punktId === '') {
-      $event['programmpunkte'][] = array_merge($felder, array('id' => uuid(), 'ablauf' => ablaufLeer(), 'erstellt_am' => jetzt(), 'geaendert_am' => jetzt(), 'sequenz' => 0));
+      $event['programmpunkte'][] = array_merge($felder, array('id' => $neuId, 'ablauf' => ablaufLeer(), 'erstellt_am' => jetzt(), 'geaendert_am' => jetzt(), 'sequenz' => 0));
       return;
     }
     $i = programmpunktIndex($event, $punktId);
     if ($i === null) abbrechen('Programmpunkt nicht gefunden.');
     programmpunktGeaendert($event, $i, $felder);
   });
+  list($nachher, $punkt) = punktNachher($id, $neuId);
+  programmMelden($nachher, $ich, $punkt, $vorher, 'hat ' . punktText($punkt) . ($vorher ? ' geändert' : ' ins Programm aufgenommen'));
   eventAntwort($id, $ich);
 }
 
@@ -93,6 +115,12 @@ function aktionProgrammpunktVerschieben() {
     if ($i === null) abbrechen('Programmpunkt nicht gefunden.');
     programmpunktGeaendert($event, $i, array('start' => $start, 'ende' => $ende));
   });
+  $vorher = $event['programmpunkte'][$i];
+  list($nachher, $punkt) = punktNachher($id, $punktId);
+  $text = $vorher['start'] === $start
+    ? 'hat die Dauer von ' . punktText($punkt) . ' geändert'
+    : 'hat «' . $punkt['titel'] . '» verschoben auf ' . zeitpunktText($punkt['start']);
+  programmMelden($nachher, $ich, $punkt, $vorher, $text);
   eventAntwort($id, $ich);
 }
 
@@ -132,6 +160,7 @@ function aktionProgrammpunktEinfuegen() {
   eventAendern($id, function (&$event) use ($neu) {
     $event['programmpunkte'][] = $neu;
   });
+  programmMelden(eventLesen($id), $ich, $neu, null, 'hat ' . punktText($neu) . ' ins Programm aufgenommen');
   antwort(array('event' => eventOeffentlich(eventLesen($id), rechteKontext($ich), personenLesen()), 'neuId' => $neu['id']));
 }
 
@@ -146,6 +175,8 @@ function aktionProgrammpunktLoeschen() {
   eventAendern($id, function (&$event) use ($punktId) {
     programmpunktEntfernen($event, $punktId);
   });
+  /* Rechte und Zuständige vor dem Löschen, sonst sähe niemand mehr den Punkt */
+  programmMelden($event, $ich, $event['programmpunkte'][programmpunktIndex($event, $punktId)], null, 'hat ' . punktText($event['programmpunkte'][programmpunktIndex($event, $punktId)]) . ' aus dem Programm gelöscht');
   eventAntwort($id, $ich);
 }
 
@@ -168,6 +199,9 @@ function aktionProgrammpunktKopieren() {
       if ($datum !== substr($punkt['start'], 0, 10)) $event['programmpunkte'][] = programmpunktKopie($punkt, $datum);
     }
   });
+  $punkt = $event['programmpunkte'][programmpunktIndex($event, $punktId)];
+  $anzahl = count(array_diff(array_unique($daten), array(substr($punkt['start'], 0, 10))));
+  programmMelden(eventLesen($id), $ich, $punkt, null, 'hat «' . $punkt['titel'] . '» auf ' . $anzahl . ($anzahl === 1 ? ' weiteren Tag' : ' weitere Tage') . ' kopiert');
   eventAntwort($id, $ich);
 }
 

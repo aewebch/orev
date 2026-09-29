@@ -74,9 +74,11 @@ function programmpunktEntfernen(&$event, $id) {
   foreach ($event['rollen'] as $i => $rolle) {
     $event['rollen'][$i]['rechte'] = array_values(array_filter($rolle['rechte'], function ($r) use ($id) { return $r['programmpunkt_id'] !== $id; }));
   }
+  zielVerweiseEntfernen($event, 'programmpunkt', $id);
 }
 
-/* Eine Person verlässt das Event: aus Zuständigen, Ablauf-Leitung und «Wer» der Schritte streichen */
+/* Eine Person verlässt das Event: aus Zuständigen, Ablauf-Leitung, «Wer» der Schritte und Aufgaben streichen;
+   Material, das sie mitnehmen sollte, ist danach ohne Zuordnung */
 function personAusProgrammEntfernen(&$event, $personId) {
   foreach ($event['programmpunkte'] as $i => $punkt) {
     $event['programmpunkte'][$i]['personen'] = array_values(array_diff($punkt['personen'], array($personId)));
@@ -84,6 +86,12 @@ function personAusProgrammEntfernen(&$event, $personId) {
     foreach ($punkt['ablauf']['schritte'] as $j => $schritt) {
       $event['programmpunkte'][$i]['ablauf']['schritte'][$j]['wer']['personen'] = array_values(array_diff($schritt['wer']['personen'], array($personId)));
     }
+  }
+  foreach ($event['aufgaben'] as $i => $aufgabe) {
+    $event['aufgaben'][$i]['personen'] = array_values(array_diff($aufgabe['personen'], array($personId)));
+  }
+  foreach ($event['material'] as $i => $posten) {
+    if ($posten['halter'] === $personId) $event['material'][$i]['halter'] = '';
   }
 }
 
@@ -93,6 +101,9 @@ function teamAusProgrammEntfernen(&$event, $teamId) {
     foreach ($punkt['ablauf']['schritte'] as $j => $schritt) {
       $event['programmpunkte'][$i]['ablauf']['schritte'][$j]['wer']['teams'] = array_values(array_diff($schritt['wer']['teams'], array($teamId)));
     }
+  }
+  foreach ($event['aufgaben'] as $i => $aufgabe) {
+    $event['aufgaben'][$i]['teams'] = array_values(array_diff($aufgabe['teams'], array($teamId)));
   }
 }
 
@@ -114,7 +125,7 @@ function ablaufschrittOeffentlich($schritt) {
   );
 }
 
-function programmpunktOeffentlich($punkt, $recht, $rechtAblauf) {
+function programmpunktOeffentlich($punkt, $recht, $rechtAblauf, $rechtAufgaben = 0, $rechtMaterial = 0) {
   return array(
     'id' => $punkt['id'],
     'titel' => $punkt['titel'],
@@ -128,6 +139,8 @@ function programmpunktOeffentlich($punkt, $recht, $rechtAblauf) {
     'teams' => $punkt['teams'],
     'recht' => $recht,
     'rechtAblauf' => $rechtAblauf,
+    'rechtAufgaben' => $rechtAufgaben,
+    'rechtMaterial' => $rechtMaterial,
     'ablauf' => $rechtAblauf >= RECHT_LESEN ? array(
       'leitung' => $punkt['ablauf']['leitung'],
       'ziele' => $punkt['ablauf']['ziele'],
@@ -141,7 +154,8 @@ function sichtbareProgrammpunkte($event, $wer) {
   $liste = array();
   foreach ($event['programmpunkte'] as $punkt) {
     $recht = effektivesRecht($event, $wer, 'programm', $punkt['id']);
-    if ($recht >= RECHT_LESEN) $liste[] = programmpunktOeffentlich($punkt, $recht, effektivesRecht($event, $wer, 'ablauf', $punkt['id']));
+    if ($recht >= RECHT_LESEN) $liste[] = programmpunktOeffentlich($punkt, $recht, effektivesRecht($event, $wer, 'ablauf', $punkt['id']),
+      effektivesRecht($event, $wer, 'aufgaben', $punkt['id']), effektivesRecht($event, $wer, 'material', $punkt['id']));
   }
   usort($liste, function ($a, $b) { return strcmp($a['start'], $b['start']); });
   return $liste;
