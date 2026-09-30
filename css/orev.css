@@ -301,6 +301,28 @@ select.pille--auswahl{appearance:none;padding-right:26px;background-image:url("d
 .ablauf__leiste{grid-column:1 / -1;display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding-top:8px;border-top:1px dashed var(--secondary-20)}
 .ablauf__fehler{grid-column:1 / -1}
 .ablauf__material,.ablauf__aufgaben{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+/* Konzept und Reflexion */
+.ziel__nummer{flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--radius-full);background:var(--primary-10);color:var(--color-primary);font-size:var(--text-caption);font-weight:var(--weight-bold)}
+.smart{flex:none;display:inline-flex;gap:2px}
+.smart__buchstabe{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:var(--radius-sm,4px);background:var(--secondary-5);color:var(--color-text-muted);font-size:11px;font-weight:var(--weight-bold);opacity:.6}
+.smart__buchstabe--ok{background:var(--success-10);color:var(--success-ink);opacity:1}
+.bilanz{display:flex;flex-wrap:wrap;gap:6px}
+.bilanz__eintrag{padding:3px 10px;border-radius:var(--radius-pill);background:var(--secondary-5);font-size:var(--text-caption);font-weight:var(--weight-bold);color:var(--color-text-muted)}
+.bilanz__eintrag--erreicht{background:var(--success-10);color:var(--success-ink)}
+.bilanz__eintrag--teilweise{background:var(--warning-10);color:var(--warning-ink)}
+.bilanz__eintrag--nicht{background:var(--danger-10);color:var(--danger-ink)}
+.stufe--erreicht,.stufe--erreicht:hover{color:var(--success-ink)}
+.stufe--teilweise,.stufe--teilweise:hover{color:var(--warning-ink)}
+.stufe--nicht,.stufe--nicht:hover{color:var(--danger-ink)}
+.pruefung-karte{padding:16px 0;border-bottom:var(--border-default);display:flex;flex-direction:column;gap:12px}
+.pruefung-karte:last-child{border-bottom:0}
+.pruefung-karte__felder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-left:34px}
+.pruefung-feld{display:flex;flex-direction:column;gap:2px;font-size:var(--text-small)}
+.teamkultur{min-height:120px}
+.feedback-neu{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--color-page-bg)}
+.feedback-neu:focus-within{box-shadow:var(--shadow-focus)}
+.feedback{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:var(--radius-lg);border:1px solid transparent;border-bottom-color:var(--secondary-10)}
+
 /* Viele Tabs auf schmalen Bildschirmen: waagrecht scrollen */
 @media (max-width:1000px){
   .event-tabs{overflow-x:auto;scrollbar-width:none}
@@ -347,6 +369,8 @@ select.pille--auswahl{appearance:none;padding-right:26px;background-image:url("d
   .material-tabelle__zeile--kopf{display:none}
   .material-tabelle__zeile{grid-template-columns:70px minmax(0,1fr);gap:4px 12px}
   .material-tabelle__zeile>span:nth-child(n+3){grid-column:2}
+  .pruefung-karte__felder{grid-template-columns:minmax(0,1fr);margin-left:0}
+  .pruefung-karte .aufgabe__kopf{flex-wrap:wrap}
 }
 @media print{
   .kopf,.leiste,.leiste-panel,.leiste-schleier,.formular__aktionen,.nicht-drucken,.ae-overlay,.material-liste__neu,.aufgaben-kurz__neu{display:none !important}

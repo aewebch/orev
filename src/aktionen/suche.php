@@ -41,6 +41,9 @@ function aktionSuche() {
         if (sucheTreffer(array($s['titel'], $s['beschreibung'], $s['methode'], $s['anmerkung']), $suche)) $dazu('ablauf', $s['titel'], 'Ablaufplan «' . $p['titel'] . '»', $basis . '/ablauf/' . $p['id']);
       }
     }
+    foreach ($event['konzept']['ziele'] as $z) {
+      if (sucheTreffer(array($z['formulierung'], $z['messkriterium']), $suche)) $dazu('ziel', mb_substr($z['formulierung'], 0, 120), 'Ziel', $basis . '/konzept');
+    }
     foreach ($event['aufgaben'] as $a) {
       if (sucheTreffer(array($a['titel'], $a['beschreibung']), $suche)) $dazu('aufgabe', $a['titel'], $a['status'] === 'erledigt' ? 'Aufgabe, erledigt' : 'Aufgabe, offen', $basis . '/aufgaben');
     }

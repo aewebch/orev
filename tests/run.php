@@ -16,6 +16,7 @@ require dirname(__DIR__) . '/src/events.php';
 require dirname(__DIR__) . '/src/programm.php';
 require dirname(__DIR__) . '/src/aufgaben.php';
 require dirname(__DIR__) . '/src/benachrichtigungen.php';
+require dirname(__DIR__) . '/src/konzept.php';
 
 $fehlgeschlagen = array();
 $anzahl = 0;

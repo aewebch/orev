@@ -8,7 +8,7 @@
 if (PHP_SAPI !== 'cli') exit;
 
 $wurzel = dirname(__DIR__);
-foreach (array('kern', 'konfiguration', 'speicher', 'sicherheit', 'personen', 'einstellungen', 'rechte', 'events', 'programm', 'aufgaben', 'migrationen') as $datei) {
+foreach (array('kern', 'konfiguration', 'speicher', 'sicherheit', 'personen', 'einstellungen', 'rechte', 'events', 'programm', 'aufgaben', 'konzept', 'migrationen') as $datei) {
   require $wurzel . '/src/' . $datei . '.php';
 }
 if (!istEingerichtet()) {
@@ -222,6 +222,19 @@ $aufgaben = array(
 $material[] = seedMaterial('Gitarre', 1, array('art' => 'aufgabe', 'punkt_id' => null, 'schritt_id' => null, 'aufgabe_id' => $aufgaben[3]['id']), $id['dario']);
 $camp['aufgaben'] = $aufgaben;
 $camp['material'] = $material;
+$ziel = function ($formulierung, $messkriterium, $termin, $erreichbarkeit, $relevanz) {
+  return array('id' => uuid(), 'formulierung' => $formulierung, 'messkriterium' => $messkriterium, 'termin' => $termin,
+    'erreichbarkeit' => $erreichbarkeit, 'relevanz' => $relevanz, 'pruefung' => pruefungLeer($messkriterium));
+};
+$camp['konzept'] = array(
+  'ziele' => array(
+    $ziel('Die Jugendlichen lernen Petrus als Freund von Jesus kennen und ziehen Parallelen zum eigenen Leben.', 'In der Schlussrunde nennen mindestens zwei Drittel eine Szene, die sie persönlich angesprochen hat.', 'Letzter Kleingruppenabend', 'Tägliche Storytime, Plenum und Kleingruppe bauen aufeinander auf.', 'Das Camp-Thema soll über die Woche hinaus tragen.'),
+    $ziel('Jede Person findet in einer Kleingruppe Anschluss.', 'Niemand bleibt in der Kleingruppen-Umfrage ohne Ansprechperson.', 'Mitte der Woche (Mittwoch)', 'Kleingruppen mit höchstens acht Personen, feste Leitende.', 'Zugehörigkeit ist Voraussetzung für Tiefgang.'),
+    $ziel('Die Teilnehmenden erleben die Toskana gemeinsam und sicher.', 'Keine ernsthaften Verletzungen, alle Ausflüge nach Plan durchgeführt.', 'Heimreise', 'Sanitätsteam, klare Regeln, Tagesverantwortung.', 'Sicherheit ist Grundlage für das Vertrauen der Eltern.'),
+  ),
+  'zielgruppe' => array('beschreibung' => 'Jugendliche der Oberstufe aus der Kirchgemeinde und ihre Freundinnen und Freunde.', 'alter_von' => 13, 'alter_bis' => 16, 'anzahl' => 40,
+    'besonderheiten' => 'Allergien und Medikamente über das Anmeldeformular erfassen. Geschlechtergetrennte Bungalows.'),
+);
 speicherSchreiben('events/' . $camp['id'], $camp);
 
 /* ---------- Weg zur Konfirmation: Start-Tag mit vollständigem Ablaufplan ---------- */

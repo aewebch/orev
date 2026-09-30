@@ -62,6 +62,9 @@ function neuesEvent($felder, $erstellerId, $vorlagen) {
     'agenda' => agendaStandard(),
     'aufgaben' => array(),
     'material' => array(),
+    'konzept' => konzeptLeer(),
+    'reflexion' => reflexionLeer(),
+    'feedbacks' => array(),
   ));
 }
 
@@ -156,6 +159,8 @@ function eventOeffentlich($event, $wer, $personen) {
   $sicht['aufgaben'] = sichtbareAufgaben($event, $wer);
   $sicht['material'] = sichtbaresMaterial($event, $wer);
   $sicht['materialGesamt'] = materialGesamtliste($sicht['material']);
+  $sicht['konzept'] = konzeptOeffentlich($event, $wer);
+  $sicht['feedbacks'] = sichtbareFeedbacks($event, $wer);
   $sicht['personen'] = $namen;
   $sicht['teams'] = $teams;
   $sicht['mitglieder'] = array();

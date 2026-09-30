@@ -165,7 +165,7 @@ app.component('app-leiste', {
       }, 250)
     },
     trefferIcon(art) {
-      return { event: 'calendar', programm: 'calendar-days', ablauf: 'list-ordered', aufgabe: 'list-todo', material: 'package', person: 'user' }[art] || 'info'
+      return { event: 'calendar', programm: 'calendar-days', ablauf: 'list-ordered', aufgabe: 'list-todo', material: 'package', ziel: 'target', person: 'user' }[art] || 'info'
     },
     async abmelden() {
       await api.anfrage('abmelden', {}).catch(function () {})

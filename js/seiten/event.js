@@ -5,6 +5,7 @@
 var EVENT_NAVIGATION = [
   { phase: 'Konzept und Vorbereitung', bereiche: [
     { id: 'uebersicht', label: 'Übersicht und Tage', kurz: 'Übersicht', icon: 'info', recht: 'stammdaten', komponente: 'event-uebersicht' },
+    { id: 'konzept', label: 'Konzept: Ziele und Zielgruppe', kurz: 'Konzept', icon: 'target', recht: 'konzept', komponente: 'event-konzept' },
     { id: 'personen', label: 'Personen und Teams', kurz: 'Personen', icon: 'users', recht: 'personen', komponente: 'event-personen' },
     { id: 'rollen', label: 'Rollen und Rechte', kurz: 'Rollen', icon: 'shield-check', recht: 'personen', komponente: 'event-rollen' },
     { id: 'aufgaben', label: 'Aufgaben', icon: 'list-todo', recht: 'aufgaben', komponente: 'event-aufgaben' },
@@ -13,6 +14,10 @@ var EVENT_NAVIGATION = [
   { phase: 'Durchführung', bereiche: [
     { id: 'programm', label: 'Programm', icon: 'calendar-days', recht: 'programm', komponente: 'event-programm' },
     { id: 'ablauf', label: 'Ablaufpläne', icon: 'list-ordered', recht: 'ablauf', komponente: 'event-ablauf' },
+  ] },
+  { phase: 'Nachbereitung', bereiche: [
+    { id: 'reflexion', label: 'Reflexion: Zielüberprüfung und Teamkultur', kurz: 'Reflexion', icon: 'lightbulb', recht: 'reflexion', komponente: 'event-reflexion' },
+    { id: 'feedback', label: 'Persönliches Feedback', kurz: 'Feedback', icon: 'message-square', recht: 'feedback', komponente: 'event-feedback' },
   ] },
 ]
 
@@ -66,8 +71,10 @@ var SeiteEvent = {
       /* Zuständige und Halter sehen ihre Aufgaben und ihr Material auch ohne Recht im Bereich */
       var aufgaben = this.event.aufgaben.length > 0
       var material = this.event.material.length > 0
+      /* Feedback schreibt jedes Mitglied */
+      var mitglied = this.event.ich.istMitglied
       return EVENT_NAVIGATION.map(function (gruppe) {
-        return { phase: gruppe.phase, bereiche: gruppe.bereiche.filter(function (b) { return b.id === 'uebersicht' || recht[b.recht] >= 1 || (b.id === 'aufgaben' && aufgaben) || (b.id === 'material' && material) }) }
+        return { phase: gruppe.phase, bereiche: gruppe.bereiche.filter(function (b) { return b.id === 'uebersicht' || recht[b.recht] >= 1 || (b.id === 'aufgaben' && aufgaben) || (b.id === 'material' && material) || (b.id === 'feedback' && mitglied) }) }
       }).filter(function (gruppe) { return gruppe.bereiche.length })
     },
     aktiv() {

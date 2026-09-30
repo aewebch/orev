@@ -20,6 +20,7 @@ require __DIR__ . '/src/events.php';
 require __DIR__ . '/src/programm.php';
 require __DIR__ . '/src/aufgaben.php';
 require __DIR__ . '/src/benachrichtigungen.php';
+require __DIR__ . '/src/konzept.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
@@ -28,6 +29,7 @@ require __DIR__ . '/src/aktionen/ablauf.php';
 require __DIR__ . '/src/aktionen/aufgaben.php';
 require __DIR__ . '/src/aktionen/benachrichtigungen.php';
 require __DIR__ . '/src/aktionen/suche.php';
+require __DIR__ . '/src/aktionen/konzept.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -106,6 +108,14 @@ try {
     'benachrichtigungen_leeren' => 'aktionBenachrichtigungenLeeren',
     'suche' => 'aktionSuche',
     'meine_aufgaben' => 'aktionMeineAufgaben',
+    'zielgruppe_speichern' => 'aktionZielgruppeSpeichern',
+    'ziel_speichern' => 'aktionZielSpeichern',
+    'ziel_verschieben' => 'aktionZielVerschieben',
+    'ziel_loeschen' => 'aktionZielLoeschen',
+    'ziel_pruefung_speichern' => 'aktionZielPruefungSpeichern',
+    'teamkultur_speichern' => 'aktionTeamkulturSpeichern',
+    'feedback_speichern' => 'aktionFeedbackSpeichern',
+    'feedback_loeschen' => 'aktionFeedbackLoeschen',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();

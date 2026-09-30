@@ -34,6 +34,7 @@ $skripte = array(
   'js/seiten/event-material.js',
   'js/seiten/event-aufgaben.js',
   'js/seiten/event-ablauf.js',
+  'js/seiten/event-konzept.js',
   'js/seiten/mitteilungen.js',
   'js/seiten/konto.js',
   'js/seiten/einstellungen.js',
