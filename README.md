@@ -49,6 +49,13 @@ Quellenangaben und Quellenverzeichnis. Zentrale Aussagen folgen dem argumentativ
 Beleg). Rückmeldungen erscheinen anonymisiert und nur für Personen mit Feedback-Recht. Drucken oder als PDF sichern
 über den Browser.
 
+## Events exportieren und importieren
+
+Die Event-Leitung exportiert ein Event im Menü «⋮» der Grunddaten als JSON-Datei. In der Übersicht lässt es sich über
+«⋮» › «Event importieren» als neues Event einlesen, auch in einer anderen Installation (JSON oder ZIP mit
+`orev-event.json`). Die Datei enthält keine Konten, Passwörter, Freigabe-Links oder Mitteilungen, ist aber nicht
+verschlüsselt. Wer importiert, wird Event-Leitung; Personen mit bekannter E-Mail-Adresse werden übernommen.
+
 ## Kalender-Abo
 
 Jede Person mit Konto erstellt unter «Mein Konto» einen geheimen Abo-Link für Apple-, Google- oder Outlook-Kalender.

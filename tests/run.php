@@ -20,6 +20,7 @@ require dirname(__DIR__) . '/src/konzept.php';
 require dirname(__DIR__) . '/src/wirkungsmodell.php';
 require dirname(__DIR__) . '/src/ical.php';
 require dirname(__DIR__) . '/src/freigaben.php';
+require dirname(__DIR__) . '/src/austausch.php';
 
 $fehlgeschlagen = array();
 $anzahl = 0;

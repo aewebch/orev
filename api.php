@@ -24,6 +24,7 @@ require __DIR__ . '/src/konzept.php';
 require __DIR__ . '/src/wirkungsmodell.php';
 require __DIR__ . '/src/ical.php';
 require __DIR__ . '/src/freigaben.php';
+require __DIR__ . '/src/austausch.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
@@ -36,6 +37,7 @@ require __DIR__ . '/src/aktionen/konzept.php';
 require __DIR__ . '/src/aktionen/wirkungsmodell.php';
 require __DIR__ . '/src/aktionen/ical.php';
 require __DIR__ . '/src/aktionen/freigaben.php';
+require __DIR__ . '/src/aktionen/austausch.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -84,6 +86,8 @@ try {
     'event_laden' => 'aktionEventLaden',
     'event_speichern' => 'aktionEventSpeichern',
     'event_loeschen' => 'aktionEventLoeschen',
+    'event_export' => 'aktionEventExport',
+    'event_import' => 'aktionEventImport',
     'tag_speichern' => 'aktionTagSpeichern',
     'personen_suche' => 'aktionPersonenSuche',
     'mitglied_hinzufuegen' => 'aktionMitgliedHinzufuegen',

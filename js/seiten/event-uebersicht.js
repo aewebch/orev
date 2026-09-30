@@ -10,6 +10,7 @@ app.component('event-uebersicht', {
           <input v-if="darf" v-model="felder.titel" class="nahtlos grunddaten__titel dehnen" maxlength="120" placeholder="Titel des Events" aria-label="Titel" @blur="speichern">
           <h2 v-else class="grunddaten__titel">{{ event.titel }}</h2>
           <pillen-menue v-if="event.ich.hatLeitungsrechte" label="Weitere Aktionen" rechts>
+            <button type="button" class="menue-eintrag menue-eintrag--icon" @click="exportieren"><ae-icon name="download" :size="16"></ae-icon>Event exportieren</button>
             <button type="button" class="menue-eintrag menue-eintrag--gefahr menue-eintrag--icon" @click="loeschen"><ae-icon name="trash-2" :size="16"></ae-icon>Event löschen</button>
           </pillen-menue>
         </div>
@@ -121,6 +122,19 @@ app.component('event-uebersicht', {
       var neu = this.tagEntwuerfe[tag.datum]
       if (!neu || neu.join() === tag.verantwortliche.join()) return
       this.tagSpeichern(tag, { verantwortliche: neu })
+    },
+    /* Export als JSON-Datei zum Import in einer anderen Installation (ohne Konten und Freigabe-Links) */
+    async exportieren() {
+      var antwort = await this.eventAktion('event_export', {}).catch(function () { return null })
+      if (!antwort) return
+      var blob = new Blob([JSON.stringify(antwort.datei, null, 2)], { type: 'application/json' })
+      var link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = 'orev-event-' + this.event.titel.replace(/[^A-Za-z0-9ÄÖÜäöü]+/g, '-').replace(/^-|-$/g, '').toLowerCase() + '.json'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      setTimeout(function () { URL.revokeObjectURL(link.href) }, 1000)
     },
     async loeschen() {
       if (!confirm('«' + this.event.titel + '» mit allen Daten endgültig löschen? Das lässt sich nicht rückgängig machen.')) return

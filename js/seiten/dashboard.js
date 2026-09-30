@@ -13,8 +13,15 @@ var SeiteDashboard = {
           <p class="seite__kicker">{{ zustand.name }}</p>
           <h1 class="reihe">{{ zustand.ich.istAdmin ? 'Events' : 'Meine Events' }} <hilfe-punkt thema="orev"></hilfe-punkt></h1>
         </div>
-        <ae-button v-if="zustand.darfEventsAnlegen" icon="plus" class="nur-desktop" @click="neuOeffnen">Neues Event</ae-button>
+        <div v-if="zustand.darfEventsAnlegen" class="reihe">
+          <ae-button icon="plus" class="nur-desktop" @click="neuOeffnen">Neues Event</ae-button>
+          <pillen-menue label="Weitere Aktionen" rechts>
+            <button type="button" class="menue-eintrag menue-eintrag--icon" @click="importWaehlen"><ae-icon name="upload" :size="16"></ae-icon>Event importieren</button>
+          </pillen-menue>
+        </div>
+        <input ref="datei" type="file" accept=".zip,.json,application/zip,application/json" hidden @change="importieren">
       </div>
+      <ae-alert v-if="importMeldung" :tone="importFehler ? 'danger' : 'info'">{{ importMeldung }}</ae-alert>
       <div class="mit-tabs" data-tour="events">
         <ae-tabs v-model="tab" :tabs="tabs"></ae-tabs>
         <ae-card>
@@ -25,6 +32,7 @@ var SeiteDashboard = {
             <p v-if="zustand.darfEventsAnlegen">Legen Sie Ihr erstes Event oder Camp an. Danach führt Sie ein geführtes Setup Schritt für Schritt durch Ziele, Team, Rollen, Aufgaben und Material.</p>
             <p v-else>Sobald Sie jemand zu einem Event hinzufügt, erscheint es hier. Ihre Aufgaben finden Sie dann unter «Meine Aufgaben».</p>
             <ae-button v-if="zustand.darfEventsAnlegen" icon="plus" @click="neuOeffnen">Erstes Event anlegen</ae-button>
+            <button v-if="zustand.darfEventsAnlegen" type="button" class="text-link" @click="importWaehlen">Oder ein Event aus einer Datei importieren</button>
             <router-link to="/hilfe" class="text-link">So funktioniert Orev</router-link>
           </div>
           <p v-else-if="!liste.length" class="leer">{{ tab === 'kommende' ? 'Keine kommenden Events.' : 'Keine vergangenen Events.' }}</p>
@@ -73,6 +81,8 @@ var SeiteDashboard = {
       neu: null,
       fehler: '',
       laeuft: false,
+      importMeldung: '',
+      importFehler: false,
     }
   },
   computed: {
@@ -102,6 +112,30 @@ var SeiteDashboard = {
       var heute = heuteIso()
       this.fehler = ''
       this.neu = { titel: '', typ: 'event', startDatum: heute, endDatum: heute, thema: '', ort: '', beschreibung: '' }
+    },
+    importWaehlen() {
+      this.$refs.datei.value = ''
+      this.$refs.datei.click()
+    },
+    /* Datei als Base64 an den Server; er erkennt JSON oder ZIP selbst */
+    importieren(ereignis) {
+      var datei = ereignis.target.files[0]
+      if (!datei) return
+      var komponente = this
+      var leser = new FileReader()
+      this.importFehler = false
+      this.importMeldung = '«' + datei.name + '» wird importiert …'
+      leser.onload = async function () {
+        try {
+          var base64 = String(leser.result).split(',')[1] || ''
+          var antwort = await api.anfrage('event_import', { datei: base64 })
+          komponente.$router.push('/event/' + antwort.id)
+        } catch (fehler) {
+          komponente.importFehler = true
+          komponente.importMeldung = fehler.message
+        }
+      }
+      leser.readAsDataURL(datei)
     },
     async anlegen() {
       this.laeuft = true

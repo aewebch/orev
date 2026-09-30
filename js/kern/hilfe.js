@@ -5,7 +5,7 @@ var HILFE_GRUPPEN = [
   { titel: 'Setup', themen: ['grunddaten', 'tage', 'konzept', 'zielgruppe', 'personen', 'teams', 'freigaben', 'rollen', 'aufgaben', 'vorbereitungstermine', 'material'] },
   { titel: 'Durchführung', themen: ['programm', 'agenda', 'bausteine', 'ablaufplan'] },
   { titel: 'Nachbereitung', themen: ['reflexion', 'bewertungen', 'wirkungsmodell', 'feedback', 'bericht'] },
-  { titel: 'Rund um Orev', themen: ['mitteilungen', 'suche', 'kalender', 'datenschutz'] },
+  { titel: 'Rund um Orev', themen: ['mitteilungen', 'suche', 'kalender', 'austausch', 'datenschutz'] },
 ]
 
 var HILFE = {
@@ -178,6 +178,14 @@ var HILFE = {
       'Zentrale Aussagen folgen dem argumentativen Dreischritt: zuerst die Behauptung, dann die Begründung, schliesslich ein Beleg oder Beispiel. Jeder Beleg verweist mit einer hochgestellten Zahl auf das Quellenverzeichnis am Schluss. Im Menü «⋮» lässt sich der Dreischritt farbig hervorheben.',
       'Rückmeldungen erscheinen anonymisiert und nur, wenn sie an das ganze Team gerichtet sind. Sie fliessen nur in den Bericht von Personen ein, die das Feedback lesen dürfen.',
       'Die Ansicht «Seiten» zeigt den Bericht als A4-Seiten mit Titelblatt; so wird er auch gedruckt oder als PDF gesichert. Auf dem Handy ist die Ansicht «Lesen» angenehmer.',
+    ],
+  },
+  austausch: {
+    titel: 'Events exportieren und importieren',
+    kurz: 'Die Event-Leitung exportiert ein Event im Menü «⋮» der Grunddaten als Datei. In der Übersicht lässt es sich über «⋮» wieder importieren, auch in einer anderen Orev-Installation.',
+    absaetze: [
+      'Die Datei enthält das ganze Event und Name, Kürzel und E-Mail der beteiligten Personen, aber keine Konten, Passwörter, Freigabe-Links oder Mitteilungen. Sie ist nicht verschlüsselt; bewahren Sie sie entsprechend auf.',
+      'Beim Import entsteht ein neues Event, und Sie werden Event-Leitung. Personen mit einer bekannten E-Mail-Adresse werden übernommen, alle anderen ohne Konto neu erfasst. Orev liest JSON-Dateien und ZIP-Dateien mit einer Datei orev-event.json.',
     ],
   },
   mitteilungen: {
