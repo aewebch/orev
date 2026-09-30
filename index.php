@@ -22,6 +22,7 @@ $skripte = array(
   'js/komponenten/orev.js',
   'js/komponenten/bedienung.js',
   'js/komponenten/leiste.js',
+  'js/komponenten/kalender-abo.js',
   'js/seiten/einrichtung.js',
   'js/seiten/anmelden.js',
   'js/seiten/einladung.js',

@@ -1,9 +1,11 @@
-# Orev: nur index.php, api.php und die statischen Dateien sind öffentlich.
+# Orev: nur index.php, api.php, ical.php und die statischen Dateien sind öffentlich.
 Options -Indexes
 DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  # Kalender-Abo: /ical/<token>.ics
+  RewriteRule ^ical/([A-Za-z0-9_-]+)\.ics$ ical.php?t=$1 [QSA,L]
   RewriteRule ^(src|migrationen|tests|docs|daten|werkzeuge)(/|$) - [F,L]
   RewriteRule ^(orev-konfiguration\.php|orev-einrichtungscode\.php|VERSION|\.git.*)$ - [F,L]
 </IfModule>

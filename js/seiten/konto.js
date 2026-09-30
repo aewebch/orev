@@ -1,4 +1,4 @@
-/* Eigenes Konto: Passwort ändern, alle Geräte abmelden */
+/* Eigenes Konto: Kalender-Abo, Passwort ändern, alle Geräte abmelden */
 var SeiteKonto = {
   template: `
     <main class="seite seite--schmal">
@@ -7,6 +7,8 @@ var SeiteKonto = {
         <h1>{{ zustand.ich.vorname }} {{ zustand.ich.name }}</h1>
         <p class="leise">{{ zustand.ich.email }}<template v-if="zustand.ich.kuerzel"> · {{ zustand.ich.kuerzel }}</template></p>
       </div>
+
+      <kalender-abo :event-id="String($route.query.event || '')"></kalender-abo>
 
       <form class="ae-card formular" @submit.prevent="passwortAendern">
         <h4 class="ae-card__title">Passwort ändern</h4>

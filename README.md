@@ -3,11 +3,11 @@
 Orev ist ein Werkzeug für Leitungsteams, die Events (ein- oder mehrtägig) und Camps planen, durchführen und auswerten:
 Konzept mit SMART-Zielen und Zielgruppe, Teams und Rollen mit fein abgestuften Rechten, Programm in Wochen-, Tages- und
 Listenansicht, Ablaufpläne pro Programmpunkt, Aufgaben mit Vorbereitungsterminen, eine zusammengeführte Materialliste,
-Reflexion und ein persönliches Kalender-Abo.
+Reflexion mit Wirkungsmodell und Fünf-Finger-Feedback, Benachrichtigungen und ein persönliches Kalender-Abo.
 
 ## Stand
 
-In Entwicklung. Auftrag und Meilensteine: [docs/auftrag.md](docs/auftrag.md).
+Alle acht Meilensteine aus dem Auftrag sind umgesetzt: [docs/auftrag.md](docs/auftrag.md).
 
 ## Installation
 
@@ -29,9 +29,24 @@ Orev braucht nur ein PHP-Hosting (PHP 7.2 oder neuer mit `openssl` und `mbstring
 - Passwörter mit Argon2id (mindestens 12 Zeichen), Sitzungen und Einladungen nur als Hash gespeichert.
 - Sitzungs-Cookie `HttpOnly`, `SameSite=Strict`, über HTTPS `Secure`; jede API-Anfrage braucht einen eigenen Header.
 - Bremse gegen Passwort-Raten (10 Fehlversuche in 15 Minuten), strenge Content-Security-Policy und Sicherheits-Header.
-- Unter Apache sperrt `.htaccess` alle internen Ordner. **Unter nginx** bitte `src/`, `migrationen/`, `tests/`, `docs/`
-  und den Datenordner selbst sperren (`location ~ ^/(src|migrationen|tests|docs|daten)/ { deny all; }`).
+- Unter Apache sperrt `.htaccess` alle internen Ordner. **Unter nginx** bitte `src/`, `migrationen/`, `tests/`, `docs/`,
+  `werkzeuge/` und den Datenordner selbst sperren (`location ~ ^/(src|migrationen|tests|docs|werkzeuge|daten)/ { deny all; }`).
 - Orev nur über HTTPS betreiben.
+
+## Kalender-Abo
+
+Jede Person mit Konto erstellt unter «Mein Konto» einen geheimen Abo-Link für Apple-, Google- oder Outlook-Kalender.
+Er enthält nur, was die Person betrifft und sehen darf: ihre Programmpunkte (direkt, über ein Team, in einem
+Ablaufschritt oder als Leitung des Ablaufplans) und jeden Vorbereitungstermin ihrer Aufgaben. Auf Wunsch zeigt er das
+ganze Programm. Der Link lässt sich jederzeit neu erzeugen; der alte wird dabei ungültig.
+
+- Adresse `/ical/<token>.ics` über die Rewrite-Regel in `.htaccess`, sonst `ical.php/<token>.ics` (erkennt Orev selbst).
+- Unter nginx für die kurze Adresse: `rewrite ^/ical/([A-Za-z0-9_-]+)\.ics$ /ical.php?t=$1 last;`
+
+## Demo-Daten
+
+`php werkzeuge/seed.php` legt auf einer eingerichteten Installation das Camp «BeachCamp 2026» und das Event «Weg zur
+Konfirmation» mit dem Start-Tag an (erfundene Personen). Mit `--neu` auch dann, wenn es sie schon gibt.
 
 ## Rechte
 

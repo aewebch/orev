@@ -314,6 +314,7 @@ app.component('event-programm', {
           </span>
           <span class="dehnen"></span>
           <ae-button v-if="anlegen && ansicht !== 'liste'" variant="tertiary" icon="list" @click="bausteineOffen = !bausteineOffen">{{ bausteineOffen ? 'Bausteine ausblenden' : 'Bausteine' }}</ae-button>
+          <ae-button variant="tertiary" icon="calendar" @click="$router.push({ path: '/konto', query: { event: event.id } })">Abonnieren</ae-button>
           <ae-button v-if="anlegen" variant="tertiary" icon="settings" @click="agendaOeffnen">Agenda</ae-button>
           <ae-button v-if="anlegen" icon="plus" size="md" @click="oeffnen(null)">Programmpunkt</ae-button>
         </div>

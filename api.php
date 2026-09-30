@@ -22,6 +22,7 @@ require __DIR__ . '/src/aufgaben.php';
 require __DIR__ . '/src/benachrichtigungen.php';
 require __DIR__ . '/src/konzept.php';
 require __DIR__ . '/src/wirkungsmodell.php';
+require __DIR__ . '/src/ical.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
@@ -32,6 +33,7 @@ require __DIR__ . '/src/aktionen/benachrichtigungen.php';
 require __DIR__ . '/src/aktionen/suche.php';
 require __DIR__ . '/src/aktionen/konzept.php';
 require __DIR__ . '/src/aktionen/wirkungsmodell.php';
+require __DIR__ . '/src/aktionen/ical.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -125,6 +127,10 @@ try {
     'wirkung_eintrag_loeschen' => 'aktionWirkungsEintragLoeschen',
     'wirkung_verbindung' => 'aktionWirkungsVerbindung',
     'wirkung_uebernehmen' => 'aktionWirkungsUebernehmen',
+    'ical_status' => 'aktionIcalStatus',
+    'ical_token_erzeugen' => 'aktionIcalTokenErzeugen',
+    'ical_beenden' => 'aktionIcalBeenden',
+    'ical_einstellung_speichern' => 'aktionIcalEinstellungSpeichern',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();
