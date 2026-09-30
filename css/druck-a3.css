@@ -1,0 +1,10 @@
+/* Druck des Wirkungsmodells: A3 quer, alle fünf Spalten nebeneinander, Farben wie am Bildschirm.
+   Wird nur beim Drucken aus dem Wirkungsmodell eingehängt (js/seiten/event-wirkungsmodell.js). */
+@page{size:A3 landscape;margin:10mm}
+@media print{
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .seite__kopf,.event-tabs,.leiste,.leiste-panel{display:none !important}
+  .event__flaeche{padding:0;box-shadow:none;border-radius:0}
+  .wm__karte{break-inside:avoid;box-shadow:none;border:1px solid var(--secondary-20);border-left-width:4px;border-left-color:var(--farbe-akzent)}
+  .wm__spaltenkopf{break-after:avoid}
+}

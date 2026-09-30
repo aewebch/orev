@@ -128,6 +128,41 @@ function aktionZielPruefungSpeichern() {
   eventAntwort($id, $ich);
 }
 
+/* Bewertung von Ort, einem Programmtag oder einem Programmpunkt (art: ort, tag, punkt; schluessel: Datum oder ID) */
+function aktionBewertungSpeichern() {
+  nurPost();
+  $ich = pflichtAnmeldung();
+  $id = eventIdAusEingabe();
+  $event = eventFuerMitglied($id, $ich);
+  pflichtRecht($event, $ich, 'reflexion', RECHT_BEARBEITEN);
+  $art = (string) feld('art');
+  $schluessel = (string) feld('schluessel');
+  $bewertung = array('bewertung' => (string) feld('bewertung'), 'notiz' => textFeld('notiz', 5000, 'Die Notiz'));
+  if ($bewertung['bewertung'] !== '' && !in_array($bewertung['bewertung'], bewertungsStufen(), true)) fehler('Ungültige Bewertung.');
+  if ($art === 'tag') {
+    $tage = array_map(function ($t) { return $t['datum']; }, $event['tage']);
+    if (!in_array($schluessel, $tage, true)) fehler('Diesen Tag gibt es im Event nicht.');
+  } elseif ($art === 'punkt') {
+    if (programmpunktIndex($event, $schluessel) === null) fehler('Programmpunkt nicht gefunden.', 404);
+    pflichtRecht($event, $ich, 'programm', RECHT_LESEN, $schluessel);
+  } elseif ($art !== 'ort') {
+    fehler('Unbekannte Bewertung.');
+  }
+  eventAendern($id, function (&$event) use ($art, $schluessel, $bewertung) {
+    $event['reflexion'] = reflexionVollstaendig($event['reflexion']);
+    $leer = $bewertung['bewertung'] === '' && trim($bewertung['notiz']) === '';
+    if ($art === 'ort') {
+      $event['reflexion']['ort'] = $bewertung;
+      return;
+    }
+    $feld = $art === 'tag' ? 'tage' : 'punkte';
+    if ($leer) unset($event['reflexion'][$feld][$schluessel]);
+    else $event['reflexion'][$feld][$schluessel] = $bewertung;
+  });
+  konzeptMelden($id, $ich, 'bewertungen', 'hat Ort, Tage oder Programmpunkte ausgewertet', 'reflexion');
+  eventAntwort($id, $ich);
+}
+
 function aktionTeamkulturSpeichern() {
   nurPost();
   $ich = pflichtAnmeldung();
@@ -151,8 +186,17 @@ function aktionFeedbackSpeichern() {
   $feedbackId = (string) feld('id');
   if ($feedbackId === '' && mitgliedVon($event, $ich['id']) === null) fehler('Feedback schreiben nur Mitglieder des Events.', 403);
   $an = (string) feld('an');
+  /* Bisheriger Freitext (vor der Fünf-Finger-Methode) bleibt erhalten, neue Feedbacks nutzen die fünf Finger */
   $text = trim(textFeld('text', 10000, 'Das Feedback'));
-  if ($text === '') fehler('Bitte schreiben Sie Ihr Feedback.');
+  $eingabe = feld('finger', array());
+  if (!is_array($eingabe)) fehler('Ungültiges Feedback.');
+  $finger = feedbackFingerLeer();
+  foreach (feedbackFinger() as $name) {
+    $wert = isset($eingabe[$name]) ? trim((string) $eingabe[$name]) : '';
+    if (mb_strlen($wert) > 5000) fehler('Eine Antwort ist zu lang (höchstens 5000 Zeichen).');
+    $finger[$name] = $wert;
+  }
+  if ($text === '' && implode('', $finger) === '') fehler('Bitte beantworten Sie mindestens eine der fünf Fragen.');
   $vonId = $ich['id'];
   if ($feedbackId !== '') {
     $i = feedbackIndex($event, $feedbackId);
@@ -161,15 +205,16 @@ function aktionFeedbackSpeichern() {
     $vonId = $event['feedbacks'][$i]['von'];
   }
   if ($an !== '' && (mitgliedVon($event, $an) === null || $an === $vonId)) fehler('Feedback an eine Person geht nur an andere Mitglieder des Events.');
-  eventAendern($id, function (&$event) use ($feedbackId, $an, $text, $vonId) {
+  eventAendern($id, function (&$event) use ($feedbackId, $an, $text, $finger, $vonId) {
     if ($feedbackId === '') {
-      $event['feedbacks'][] = array('id' => uuid(), 'von' => $vonId, 'an' => $an, 'text' => $text, 'erstellt_am' => jetzt(), 'geaendert_am' => jetzt());
+      $event['feedbacks'][] = array('id' => uuid(), 'von' => $vonId, 'an' => $an, 'text' => $text, 'finger' => $finger, 'erstellt_am' => jetzt(), 'geaendert_am' => jetzt());
       return;
     }
     $i = feedbackIndex($event, $feedbackId);
     if ($i === null) abbrechen('Feedback nicht gefunden.');
     $event['feedbacks'][$i]['an'] = $an;
     $event['feedbacks'][$i]['text'] = $text;
+    $event['feedbacks'][$i]['finger'] = $finger;
     $event['feedbacks'][$i]['geaendert_am'] = jetzt();
   });
   if ($feedbackId === '') {

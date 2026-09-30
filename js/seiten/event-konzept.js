@@ -188,7 +188,59 @@ app.component('event-konzept', {
   },
 })
 
-/* Nachbereitung: jedes Ziel überprüfen (wie, Ergebnis, Erreichungsgrad, Kommentar) und die Teamkultur auswerten */
+var BEWERTUNGEN = [{ id: 'gut', label: 'Gut' }, { id: 'mittel', label: 'Mittel' }, { id: 'schwach', label: 'Schwach' }]
+
+/* Eine Zeile der Auswertung: Titel, Bewertung (gut, mittel, schwach) und Notiz; speichert beim Wählen und beim Verlassen */
+app.component('bewertung-zeile', {
+  props: {
+    titel: { type: String, required: true },
+    meta: { type: String, default: '' },
+    wert: { type: Object, default: null },
+    darf: { type: Boolean, default: false },
+    platzhalter: { type: String, default: 'Notiz …' },
+  },
+  emits: ['speichern'],
+  template: `
+    <div :class="['bewertung', entwurf.bewertung ? 'bewertung--' + entwurf.bewertung : '']">
+      <div class="bewertung__kopf">
+        <div class="dehnen">
+          <strong class="bewertung__titel">{{ titel }}</strong>
+          <span v-if="meta" class="leise bewertung__meta">{{ meta }}</span>
+        </div>
+        <span class="stufen" role="radiogroup" :aria-label="'Bewertung ' + titel">
+          <button v-for="b in stufen" :key="b.id" type="button" role="radio" :aria-checked="entwurf.bewertung === b.id" :disabled="!darf"
+            :class="['stufe', entwurf.bewertung === b.id ? 'stufe--aktiv stufe--' + b.id : '']" @click="waehlen(b.id)">{{ b.label }}</button>
+        </span>
+      </div>
+      <textarea v-if="darf" v-model="entwurf.notiz" v-wachsen class="nahtlos bewertung__notiz" rows="1" maxlength="5000" :placeholder="platzhalter" :aria-label="'Notiz ' + titel" @blur="speichern"></textarea>
+      <p v-else-if="entwurf.notiz" class="ablauf__text">{{ entwurf.notiz }}</p>
+    </div>
+  `,
+  data() {
+    return { stufen: BEWERTUNGEN, entwurf: { bewertung: '', notiz: '' } }
+  },
+  watch: {
+    wert: {
+      immediate: true,
+      handler(w) {
+        this.entwurf = { bewertung: w ? w.bewertung : '', notiz: w ? w.notiz : '' }
+      },
+    },
+  },
+  methods: {
+    waehlen(id) {
+      this.entwurf.bewertung = this.entwurf.bewertung === id ? '' : id
+      this.speichern()
+    },
+    speichern() {
+      var alt = this.wert || { bewertung: '', notiz: '' }
+      if (alt.bewertung === this.entwurf.bewertung && alt.notiz === this.entwurf.notiz) return
+      this.$emit('speichern', Object.assign({}, this.entwurf))
+    },
+  },
+})
+
+/* Nachbereitung: Ziele überprüfen, Ort, Tage und Programmpunkte bewerten, Teamkultur auswerten */
 app.component('event-reflexion', {
   props: { event: { type: Object, required: true } },
   inject: ['eventAktion'],
@@ -227,6 +279,36 @@ app.component('event-reflexion', {
       </div>
     </ae-card>
 
+    <ae-card v-if="bewertungen" title="Ort und Unterkunft">
+      <bewertung-zeile :titel="event.ort || 'Ort'" meta="Lage, Unterkunft, Infrastruktur, Verpflegung" :wert="bewertungen.ort" :darf="darf"
+        platzhalter="Was hat gepasst, was fehlte? Würden wir wieder hierher gehen?" @speichern="bewerten('ort', '', $event)"></bewertung-zeile>
+    </ae-card>
+
+    <ae-card v-if="bewertungen" title="Programmtage">
+      <template #actions><span class="bilanz"><span v-for="b in bilanzVon(bewertungen.tage)" :key="b.id" :class="['bilanz__eintrag', 'bilanz__eintrag--' + b.id]">{{ b.anzahl }} {{ b.label.toLowerCase() }}</span></span></template>
+      <div class="stapel stapel--eng">
+        <bewertung-zeile v-for="t in event.tage" :key="t.datum" :titel="wochentagText(t.datum) + ' ' + datumText(t.datum + 'T12:00:00')" :meta="tagMeta(t)"
+          :wert="bewertungen.tage[t.datum]" :darf="darf" platzhalter="Stimmung, Energie, was an diesem Tag auffiel …" @speichern="bewerten('tag', t.datum, $event)"></bewertung-zeile>
+      </div>
+    </ae-card>
+
+    <ae-card v-if="bewertungen" title="Programmpunkte">
+      <template #actions><span class="bilanz"><span v-for="b in bilanzVon(bewertungen.punkte)" :key="b.id" :class="['bilanz__eintrag', 'bilanz__eintrag--' + b.id]">{{ b.anzahl }} {{ b.label.toLowerCase() }}</span></span></template>
+      <p v-if="!punkteNachTag.length" class="leer">Noch keine Programmpunkte.</p>
+      <div class="stapel stapel--eng">
+        <details v-for="g in punkteNachTag" :key="g.schluessel" class="bewertung-gruppe" :open="offeneGruppen[g.schluessel] !== undefined ? offeneGruppen[g.schluessel] : g.offen" @toggle="offeneGruppen[g.schluessel] = $event.target.open">
+          <summary class="bewertung-gruppe__kopf">
+            <strong class="dehnen">{{ g.titel }}</strong>
+            <span class="leise">{{ g.bewertet }} von {{ g.punkte.length }} bewertet</span>
+          </summary>
+          <div class="stapel stapel--eng">
+            <bewertung-zeile v-for="p in g.punkte" :key="p.id" :titel="p.titel" :meta="p.start.slice(11) + (p.ende ? '–' + p.ende.slice(11) : '') + (p.ort ? ' · ' + p.ort : '')"
+              :wert="bewertungen.punkte[p.id]" :darf="darf" platzhalter="Wie ist es gelaufen? Was ändern wir?" @speichern="bewerten('punkt', p.id, $event)"></bewertung-zeile>
+          </div>
+        </details>
+      </div>
+    </ae-card>
+
     <ae-card title="Teamkultur" subtitle="Wie war das Miteinander im Team? Was nehmen wir mit?">
       <textarea v-if="darf" v-model="teamkultur" v-wachsen class="nahtlos teamkultur" rows="3" maxlength="20000" placeholder="Auswertung des Miteinanders …" aria-label="Teamkultur" @blur="teamkulturSpeichern"></textarea>
       <p v-else class="ablauf__text">{{ teamkultur || 'Noch keine Auswertung.' }}</p>
@@ -241,6 +323,7 @@ app.component('event-reflexion', {
         { id: 'kommentar', label: 'Kommentar', platzhalter: 'Gründe, Erkenntnisse, nächstes Mal …', max: 5000 },
       ],
       entwuerfe: {},
+      offeneGruppen: {},
       teamkultur: '',
     }
   },
@@ -250,6 +333,36 @@ app.component('event-reflexion', {
     },
     ziele() {
       return this.event.konzept.ziele.filter(function (z) { return z.pruefung })
+    },
+    bewertungen() {
+      return this.event.konzept.bewertungen
+    },
+    /* Programmpunkte nach Tagen; Vorbereitung (z. B. Elternabend) als eigene Gruppe. Offen ist der erste Tag mit Unbewertetem. */
+    punkteNachTag() {
+      var bewertungen = this.bewertungen ? this.bewertungen.punkte : {}
+      var gruppen = []
+      var vorbereitung = { schluessel: 'vorbereitung', titel: 'Vorbereitung', punkte: [] }
+      var nachDatum = {}
+      this.event.programmpunkte.forEach(function (p) {
+        if (p.phase === 'vorbereitung') {
+          vorbereitung.punkte.push(p)
+          return
+        }
+        var datum = p.start.slice(0, 10)
+        if (!nachDatum[datum]) {
+          nachDatum[datum] = { schluessel: datum, titel: wochentagText(datum) + ' ' + datumText(datum + 'T12:00:00'), punkte: [] }
+          gruppen.push(nachDatum[datum])
+        }
+        nachDatum[datum].punkte.push(p)
+      })
+      if (vorbereitung.punkte.length) gruppen.unshift(vorbereitung)
+      var offenGesetzt = false
+      gruppen.forEach(function (g) {
+        g.bewertet = g.punkte.filter(function (p) { return bewertungen[p.id] && bewertungen[p.id].bewertung }).length
+        g.offen = !offenGesetzt && g.bewertet < g.punkte.length
+        if (g.offen) offenGesetzt = true
+      })
+      return gruppen
     },
     bilanz() {
       var entwuerfe = this.entwuerfe
@@ -286,6 +399,22 @@ app.component('event-reflexion', {
       e.grad = e.grad === grad ? '' : grad
       this.speichern(z)
     },
+    wochentagText: wochentagText,
+    datumText: datumText,
+    tagMeta(t) {
+      var personen = this.event.personen
+      var tv = t.verantwortliche.map(function (id) { return personKurz(personen[id]) }).join(', ')
+      return [t.thema, tv ? 'TV: ' + tv : ''].filter(Boolean).join(' · ')
+    },
+    bilanzVon(eintraege) {
+      var werte = Object.values(eintraege || {})
+      return BEWERTUNGEN.map(function (b) {
+        return { id: b.id, label: b.label, anzahl: werte.filter(function (w) { return w.bewertung === b.id }).length }
+      }).filter(function (b) { return b.anzahl })
+    },
+    async bewerten(art, schluessel, wert) {
+      await this.eventAktion('bewertung_speichern', { art: art, schluessel: schluessel, bewertung: wert.bewertung, notiz: wert.notiz }).catch(function () {})
+    },
     async teamkulturSpeichern() {
       if (this.teamkultur === (this.event.konzept.teamkultur || '')) return
       await this.eventAktion('teamkultur_speichern', { text: this.teamkultur }).catch(function () {})
@@ -293,52 +422,148 @@ app.component('event-reflexion', {
   },
 })
 
-/* Persönliche Feedbacks: vertraulich, nur für die verfassende Person und wer das Recht «Feedback» hat */
+/* Persönliche Feedbacks nach der Fünf-Finger-Methode. Vertraulich: nur für die verfassende Person und wer das Recht
+   «Feedback» hat (Event-Leitung immer). Wer mehrere Feedbacks sieht, kann sie auch nach Fingern gebündelt lesen. */
+var FEEDBACK_FINGER = [
+  { id: 'daumen', nummer: 1, name: 'Daumen', frage: 'Was fand ich gut?', farbe: 'gruen' },
+  { id: 'zeigefinger', nummer: 2, name: 'Zeigefinger', frage: 'Das merke ich mir', farbe: 'blau' },
+  { id: 'mittelfinger', nummer: 3, name: 'Mittelfinger', frage: 'Das würde ich ändern (fand ich nicht so gut)', farbe: 'rot' },
+  { id: 'ringfinger', nummer: 4, name: 'Ringfinger', frage: 'Das ging mir nahe', farbe: 'rosa' },
+  { id: 'kleinerfinger', nummer: 5, name: 'Kleiner Finger', frage: 'Das kam mir zu kurz', farbe: 'orange' },
+]
+
+function fingerLeer() {
+  var leer = {}
+  FEEDBACK_FINGER.forEach(function (f) { leer[f.id] = '' })
+  return leer
+}
+
+/* Fünf Fragen als nahtlose Felder mit Finger-Marke */
+app.component('finger-eingabe', {
+  props: { modelValue: { type: Object, required: true } },
+  emits: ['update:modelValue'],
+  template: `
+    <div class="finger-liste">
+      <label v-for="f in finger" :key="f.id" :class="['finger', 'farbe--' + f.farbe]">
+        <span class="finger__marke" :title="f.name">{{ f.nummer }}</span>
+        <span class="finger__inhalt">
+          <span class="finger__frage"><strong>{{ f.name }}</strong> · {{ f.frage }}</span>
+          <textarea v-wachsen class="nahtlos" rows="1" maxlength="5000" :value="modelValue[f.id]" :placeholder="platzhalter[f.id]" :aria-label="f.name + ': ' + f.frage" @input="setzen(f.id, $event.target.value)"></textarea>
+        </span>
+      </label>
+    </div>
+  `,
+  data() {
+    return {
+      finger: FEEDBACK_FINGER,
+      platzhalter: {
+        daumen: 'Was hat mir gefallen, was hat gut funktioniert?',
+        zeigefinger: 'Was nehme ich für mich oder fürs nächste Mal mit?',
+        mittelfinger: 'Was lief nicht gut, was würde ich anders machen?',
+        ringfinger: 'Welcher Moment hat mich berührt, gefreut, geärgert oder bewegt?',
+        kleinerfinger: 'Wofür blieb zu wenig Zeit oder Aufmerksamkeit?',
+      },
+    }
+  },
+  methods: {
+    setzen(id, wert) {
+      var neu = Object.assign({}, this.modelValue)
+      neu[id] = wert
+      this.$emit('update:modelValue', neu)
+    },
+  },
+})
+
 app.component('event-feedback', {
   props: { event: { type: Object, required: true } },
   inject: ['eventAktion'],
   template: `
-    <ae-card title="Feedback">
+    <ae-card title="Feedback" subtitle="Fünf-Finger-Reflexion: Beantworten Sie die Fragen, die Ihnen etwas sagen. Keine ist Pflicht.">
+      <template v-if="mehrere" #actions>
+        <span class="stufen" role="radiogroup" aria-label="Ansicht">
+          <button v-for="a in ansichten" :key="a.id" type="button" role="radio" :aria-checked="ansicht === a.id" :class="['stufe', ansicht === a.id ? 'stufe--aktiv' : '']" @click="ansicht = a.id">{{ a.label }}</button>
+        </span>
+      </template>
       <div class="stapel">
-        <p class="reihe leise"><ae-icon name="lock" :size="16"></ae-icon>Vertraulich: Ihr Feedback sehen nur Sie und die Event-Leitung{{ weitere ? ' sowie Personen mit dem Recht «Feedback»' : '' }}.</p>
-        <div v-if="event.ich.istMitglied" class="feedback-neu">
-          <textarea v-model="neu.text" v-wachsen class="nahtlos" rows="2" maxlength="10000" placeholder="Was war gut, was nehmen wir mit, was würden Sie ändern?" aria-label="Neues Feedback"></textarea>
-          <div class="reihe reihe--verteilt">
-            <select v-model="neu.an" class="pille pille--auswahl" aria-label="An wen">
-              <option value="">Zum ganzen Event</option>
-              <option v-for="p in andere" :key="p.id" :value="p.id">An {{ p.vorname }} {{ p.name }}</option>
-            </select>
-            <ae-button size="sm" icon="send" :disabled="!neu.text.trim()" @click="absenden">Speichern</ae-button>
-          </div>
-        </div>
-        <p v-if="!event.feedbacks.length" class="leer">Noch kein Feedback.</p>
-        <div v-for="f in event.feedbacks" :key="f.id" :class="['feedback', aktiv === f.id ? 'aufgabe--aktiv' : '', f.recht >= 2 && aktiv !== f.id ? 'aufgabe--editierbar' : '']" @click="oeffnen(f)">
-          <div class="reihe reihe--verteilt">
-            <span class="klein"><strong>{{ f.eigenes ? 'Ihr Feedback' : name(f.von) }}</strong> · {{ f.an ? 'an ' + name(f.an) : 'zum Event' }}</span>
-            <span class="leise">{{ zeitRelativ(f.erstelltAm) }}</span>
-          </div>
-          <template v-if="aktiv === f.id">
-            <textarea v-model="entwurf.text" v-wachsen v-fokus class="nahtlos" rows="2" maxlength="10000" aria-label="Feedback" @click.stop></textarea>
-            <div class="reihe reihe--verteilt" @click.stop>
-              <select v-model="entwurf.an" class="pille pille--auswahl" aria-label="An wen">
-                <option value="">Zum ganzen Event</option>
-                <option v-for="p in anderePersonen(f.von)" :key="p.id" :value="p.id">An {{ p.vorname }} {{ p.name }}</option>
-              </select>
-              <span class="reihe">
-                <pillen-menue label="Weitere Aktionen" rechts>
-                  <button type="button" class="menue-eintrag menue-eintrag--gefahr" @click="loeschen(f)">Feedback löschen</button>
-                </pillen-menue>
-                <ae-button size="sm" @click="fertig">Fertig</ae-button>
-              </span>
+        <p class="hinweis-zeile leise"><ae-icon name="lock" :size="16"></ae-icon>Vertraulich: Ihr Feedback sehen nur Sie und die Event-Leitung{{ weitere ? ' sowie Personen mit dem Recht «Feedback»' : '' }}.</p>
+
+        <template v-if="ansicht === 'eintraege'">
+          <div v-if="event.ich.istMitglied">
+            <button v-if="!schreiben" type="button" class="neue-zeile neue-zeile--knopf" @click="schreiben = true"><ae-icon name="message-square" :size="18"></ae-icon>Feedback schreiben</button>
+            <div v-else class="feedback-neu">
+              <finger-eingabe v-model="neu.finger"></finger-eingabe>
+              <div class="reihe reihe--verteilt">
+                <select v-model="neu.an" class="pille pille--auswahl" aria-label="An wen">
+                  <option value="">Zum ganzen Event</option>
+                  <option v-for="p in andere" :key="p.id" :value="p.id">An {{ p.vorname }} {{ p.name }}</option>
+                </select>
+                <span class="reihe">
+                  <ae-button variant="tertiary" size="sm" @click="schreiben = false">Abbrechen</ae-button>
+                  <ae-button size="sm" icon="send" :disabled="!hatInhalt(neu.finger)" @click="absenden">Speichern</ae-button>
+                </span>
+              </div>
             </div>
-          </template>
-          <p v-else class="ablauf__text">{{ f.text }}</p>
+          </div>
+
+          <p v-if="!event.feedbacks.length" class="leer">Noch kein Feedback.</p>
+          <div v-for="f in event.feedbacks" :key="f.id" :class="['feedback', aktiv === f.id ? 'aufgabe--aktiv' : '', f.recht >= 2 && aktiv !== f.id ? 'aufgabe--editierbar' : '']" @click="oeffnen(f)">
+            <div class="reihe reihe--verteilt">
+              <span class="klein"><strong>{{ f.eigenes ? 'Ihr Feedback' : name(f.von) }}</strong> · {{ f.an ? 'an ' + name(f.an) : 'zum Event' }}</span>
+              <span class="leise">{{ zeitRelativ(f.erstelltAm) }}</span>
+            </div>
+            <template v-if="aktiv === f.id">
+              <div @click.stop><finger-eingabe v-model="entwurf.finger"></finger-eingabe></div>
+              <textarea v-if="entwurf.text" v-model="entwurf.text" v-wachsen class="nahtlos" rows="2" maxlength="10000" aria-label="Früheres Feedback" @click.stop></textarea>
+              <div class="reihe reihe--verteilt" @click.stop>
+                <select v-model="entwurf.an" class="pille pille--auswahl" aria-label="An wen">
+                  <option value="">Zum ganzen Event</option>
+                  <option v-for="p in anderePersonen(f.von)" :key="p.id" :value="p.id">An {{ p.vorname }} {{ p.name }}</option>
+                </select>
+                <span class="reihe">
+                  <pillen-menue label="Weitere Aktionen" rechts>
+                    <button type="button" class="menue-eintrag menue-eintrag--gefahr" @click="loeschen(f)">Feedback löschen</button>
+                  </pillen-menue>
+                  <ae-button size="sm" @click="fertig">Fertig</ae-button>
+                </span>
+              </div>
+            </template>
+            <template v-else>
+              <div v-for="fi in beantwortet(f)" :key="fi.id" :class="['finger', 'finger--lesen', 'farbe--' + fi.farbe]">
+                <span class="finger__marke" :title="fi.name">{{ fi.nummer }}</span>
+                <span class="finger__inhalt"><span class="finger__frage"><strong>{{ fi.name }}</strong> · {{ fi.frage }}</span><span class="ablauf__text">{{ f.finger[fi.id] }}</span></span>
+              </div>
+              <p v-if="f.text" class="ablauf__text">{{ f.text }}</p>
+            </template>
+          </div>
+        </template>
+
+        <div v-else class="stapel">
+          <section v-for="fi in finger" :key="fi.id" :class="['finger-gruppe', 'farbe--' + fi.farbe]">
+            <h4 class="finger-gruppe__titel"><span class="finger__marke">{{ fi.nummer }}</span><span class="dehnen">{{ fi.name }} · {{ fi.frage }}</span><span class="leise">{{ antworten(fi.id).length }}</span></h4>
+            <p v-if="!antworten(fi.id).length" class="leise">Keine Antworten.</p>
+            <blockquote v-for="a in antworten(fi.id)" :key="a.id" class="finger-gruppe__antwort">
+              <span class="ablauf__text">{{ a.text }}</span>
+              <span class="leise">{{ a.eigenes ? 'Sie' : name(a.von) }}{{ a.an ? ' an ' + name(a.an) : '' }}</span>
+            </blockquote>
+          </section>
         </div>
       </div>
     </ae-card>
   `,
   data() {
-    return { neu: { text: '', an: '' }, aktiv: null, entwurf: null }
+    return {
+      finger: FEEDBACK_FINGER,
+      ansichten: [{ id: 'eintraege', label: 'Einträge' }, { id: 'finger', label: 'Nach Fingern' }],
+      ansicht: 'eintraege',
+      schreiben: false,
+      neu: { finger: fingerLeer(), an: '' },
+      aktiv: null,
+      entwurf: null,
+      original: '',
+    }
+  },
+  created() {
+    this.schreiben = this.event.ich.istMitglied && !this.event.feedbacks.some(function (f) { return f.eigenes })
   },
   computed: {
     andere() {
@@ -347,9 +572,24 @@ app.component('event-feedback', {
     weitere() {
       return this.event.ich.recht.feedback >= 1 && !this.event.ich.hatLeitungsrechte
     },
+    /* Die Auswertung nach Fingern lohnt sich, sobald man Feedbacks anderer sieht */
+    mehrere() {
+      return this.event.feedbacks.some(function (f) { return !f.eigenes })
+    },
   },
   methods: {
     zeitRelativ: zeitRelativ,
+    hatInhalt(finger) {
+      return Object.values(finger).some(function (t) { return t.trim() })
+    },
+    beantwortet(f) {
+      return FEEDBACK_FINGER.filter(function (fi) { return f.finger[fi.id] })
+    },
+    antworten(fingerId) {
+      return this.event.feedbacks.filter(function (f) { return f.finger[fingerId] }).map(function (f) {
+        return { id: f.id, text: f.finger[fingerId], von: f.von, an: f.an, eigenes: f.eigenes }
+      })
+    },
     name(id) {
       var p = this.event.personen[id]
       return p ? p.vorname + ' ' + p.name : 'ehemaliges Mitglied'
@@ -359,8 +599,9 @@ app.component('event-feedback', {
     },
     async absenden() {
       try {
-        await this.eventAktion('feedback_speichern', { id: '', an: this.neu.an, text: this.neu.text })
-        this.neu = { text: '', an: '' }
+        await this.eventAktion('feedback_speichern', { id: '', an: this.neu.an, text: '', finger: this.neu.finger })
+        this.neu = { finger: fingerLeer(), an: '' }
+        this.schreiben = false
       } catch (fehler) {
         /* Meldung zeigt der Eventbereich */
       }
@@ -368,13 +609,13 @@ app.component('event-feedback', {
     oeffnen(f) {
       if (f.recht < 2 || this.aktiv === f.id) return
       this.aktiv = f.id
-      this.entwurf = { text: f.text, an: f.an }
+      this.entwurf = { finger: Object.assign({}, f.finger), text: f.text, an: f.an }
+      this.original = JSON.stringify(this.entwurf)
     },
     async fertig() {
-      var f = this.event.feedbacks.find(function (x) { return x.id === this.aktiv }, this)
-      if (f && (f.text !== this.entwurf.text || f.an !== this.entwurf.an)) {
+      if (JSON.stringify(this.entwurf) !== this.original) {
         try {
-          await this.eventAktion('feedback_speichern', { id: f.id, an: this.entwurf.an, text: this.entwurf.text })
+          await this.eventAktion('feedback_speichern', { id: this.aktiv, an: this.entwurf.an, text: this.entwurf.text, finger: this.entwurf.finger })
         } catch (fehler) {
           return
         }

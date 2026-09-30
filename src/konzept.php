@@ -12,7 +12,21 @@ function konzeptLeer() {
 }
 
 function reflexionLeer() {
-  return array('teamkultur' => '');
+  return array('teamkultur' => '', 'ort' => bewertungLeer(), 'tage' => array(), 'punkte' => array());
+}
+
+/* Bewertung von Ort, Programmtagen und Programmpunkten in der Nachbereitung: gut, mittel oder schwach, dazu eine Notiz */
+function bewertungLeer() {
+  return array('bewertung' => '', 'notiz' => '');
+}
+
+function bewertungsStufen() {
+  return array('gut', 'mittel', 'schwach');
+}
+
+/* Ältere Events kennen nur die Teamkultur */
+function reflexionVollstaendig($reflexion) {
+  return array_merge(reflexionLeer(), $reflexion);
 }
 
 function pruefungLeer($messkriterium) {
@@ -29,6 +43,16 @@ function zielIndex($event, $id) {
     if ($ziel['id'] === $id) return $i;
   }
   return null;
+}
+
+/* Fünf-Finger-Reflexion: Daumen (gut), Zeigefinger (merke ich mir), Mittelfinger (würde ich ändern),
+   Ringfinger (ging mir nahe), kleiner Finger (kam zu kurz) */
+function feedbackFinger() {
+  return array('daumen', 'zeigefinger', 'mittelfinger', 'ringfinger', 'kleinerfinger');
+}
+
+function feedbackFingerLeer() {
+  return array_fill_keys(feedbackFinger(), '');
 }
 
 function feedbackIndex($event, $id) {
@@ -51,6 +75,7 @@ function sichtbareFeedbacks($event, $wer) {
     if ($recht < RECHT_LESEN) continue;
     $liste[] = array(
       'id' => $f['id'], 'von' => $f['von'], 'an' => $f['an'], 'text' => $f['text'],
+      'finger' => isset($f['finger']) ? array_merge(feedbackFingerLeer(), $f['finger']) : feedbackFingerLeer(),
       'erstelltAm' => $f['erstellt_am'], 'geaendertAm' => $f['geaendert_am'],
       'eigenes' => $f['von'] === $wer['id'], 'recht' => $recht,
     );
@@ -63,7 +88,7 @@ function sichtbareFeedbacks($event, $wer) {
 function konzeptOeffentlich($event, $wer) {
   $konzept = effektivesRecht($event, $wer, 'konzept');
   $reflexion = effektivesRecht($event, $wer, 'reflexion');
-  $sicht = array('ziele' => array(), 'zielgruppe' => null, 'teamkultur' => null);
+  $sicht = array('ziele' => array(), 'zielgruppe' => null, 'teamkultur' => null, 'bewertungen' => null);
   if ($konzept >= RECHT_LESEN || $reflexion >= RECHT_LESEN) {
     foreach ($event['konzept']['ziele'] as $ziel) {
       $eintrag = array(
@@ -79,7 +104,16 @@ function konzeptOeffentlich($event, $wer) {
     $z = $event['konzept']['zielgruppe'];
     $sicht['zielgruppe'] = array('beschreibung' => $z['beschreibung'], 'alterVon' => $z['alter_von'], 'alterBis' => $z['alter_bis'], 'anzahl' => $z['anzahl'], 'besonderheiten' => $z['besonderheiten']);
   }
-  if ($reflexion >= RECHT_LESEN) $sicht['teamkultur'] = $event['reflexion']['teamkultur'];
+  if ($reflexion >= RECHT_LESEN) {
+    $r = reflexionVollstaendig($event['reflexion']);
+    $sicht['teamkultur'] = $r['teamkultur'];
+    $punkte = array();
+    foreach ($r['punkte'] as $punktId => $b) {
+      /* Bewertungen von Programmpunkten nur, wenn die Person den Punkt sehen darf */
+      if (effektivesRecht($event, $wer, 'programm', $punktId) >= RECHT_LESEN) $punkte[$punktId] = $b;
+    }
+    $sicht['bewertungen'] = array('ort' => $r['ort'], 'tage' => (object) $r['tage'], 'punkte' => (object) $punkte);
+  }
   return $sicht;
 }
 

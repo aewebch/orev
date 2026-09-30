@@ -17,6 +17,7 @@ var EVENT_NAVIGATION = [
   ] },
   { phase: 'Nachbereitung', bereiche: [
     { id: 'reflexion', label: 'Reflexion: Zielüberprüfung und Teamkultur', kurz: 'Reflexion', icon: 'lightbulb', recht: 'reflexion', komponente: 'event-reflexion' },
+    { id: 'wirkungsmodell', label: 'Bericht: Wirkungsmodell', kurz: 'Wirkungsmodell', icon: 'workflow', recht: 'reflexion', komponente: 'event-wirkungsmodell' },
     { id: 'feedback', label: 'Persönliches Feedback', kurz: 'Feedback', icon: 'message-square', recht: 'feedback', komponente: 'event-feedback' },
   ] },
 ]

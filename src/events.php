@@ -65,6 +65,7 @@ function neuesEvent($felder, $erstellerId, $vorlagen) {
     'konzept' => konzeptLeer(),
     'reflexion' => reflexionLeer(),
     'feedbacks' => array(),
+    'wirkungsmodell' => wirkungsmodellLeer(),
   ));
 }
 
@@ -161,6 +162,7 @@ function eventOeffentlich($event, $wer, $personen) {
   $sicht['materialGesamt'] = materialGesamtliste($sicht['material']);
   $sicht['konzept'] = konzeptOeffentlich($event, $wer);
   $sicht['feedbacks'] = sichtbareFeedbacks($event, $wer);
+  $sicht['wirkungsmodell'] = $recht['reflexion'] >= RECHT_LESEN ? wirkungsmodellOeffentlich($event['wirkungsmodell']) : null;
   $sicht['personen'] = $namen;
   $sicht['teams'] = $teams;
   $sicht['mitglieder'] = array();

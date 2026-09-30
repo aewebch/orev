@@ -75,6 +75,7 @@ function programmpunktEntfernen(&$event, $id) {
     $event['rollen'][$i]['rechte'] = array_values(array_filter($rolle['rechte'], function ($r) use ($id) { return $r['programmpunkt_id'] !== $id; }));
   }
   zielVerweiseEntfernen($event, 'programmpunkt', $id);
+  if (isset($event['reflexion']['punkte'][$id])) unset($event['reflexion']['punkte'][$id]);
 }
 
 /* Eine Person verlässt das Event: aus Zuständigen, Ablauf-Leitung, «Wer» der Schritte und Aufgaben streichen;

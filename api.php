@@ -21,6 +21,7 @@ require __DIR__ . '/src/programm.php';
 require __DIR__ . '/src/aufgaben.php';
 require __DIR__ . '/src/benachrichtigungen.php';
 require __DIR__ . '/src/konzept.php';
+require __DIR__ . '/src/wirkungsmodell.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
@@ -30,6 +31,7 @@ require __DIR__ . '/src/aktionen/aufgaben.php';
 require __DIR__ . '/src/aktionen/benachrichtigungen.php';
 require __DIR__ . '/src/aktionen/suche.php';
 require __DIR__ . '/src/aktionen/konzept.php';
+require __DIR__ . '/src/aktionen/wirkungsmodell.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -114,8 +116,15 @@ try {
     'ziel_loeschen' => 'aktionZielLoeschen',
     'ziel_pruefung_speichern' => 'aktionZielPruefungSpeichern',
     'teamkultur_speichern' => 'aktionTeamkulturSpeichern',
+    'bewertung_speichern' => 'aktionBewertungSpeichern',
     'feedback_speichern' => 'aktionFeedbackSpeichern',
     'feedback_loeschen' => 'aktionFeedbackLoeschen',
+    'wirkung_kopf_speichern' => 'aktionWirkungsKopfSpeichern',
+    'wirkung_eintrag_speichern' => 'aktionWirkungsEintragSpeichern',
+    'wirkung_eintrag_verschieben' => 'aktionWirkungsEintragVerschieben',
+    'wirkung_eintrag_loeschen' => 'aktionWirkungsEintragLoeschen',
+    'wirkung_verbindung' => 'aktionWirkungsVerbindung',
+    'wirkung_uebernehmen' => 'aktionWirkungsUebernehmen',
   );
   if (!isset($aktionen[$aktion])) fehler('Unbekannte Aktion.', 404);
   $aktionen[$aktion]();

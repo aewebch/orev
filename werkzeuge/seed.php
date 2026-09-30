@@ -8,7 +8,7 @@
 if (PHP_SAPI !== 'cli') exit;
 
 $wurzel = dirname(__DIR__);
-foreach (array('kern', 'konfiguration', 'speicher', 'sicherheit', 'personen', 'einstellungen', 'rechte', 'events', 'programm', 'aufgaben', 'konzept', 'migrationen') as $datei) {
+foreach (array('kern', 'konfiguration', 'speicher', 'sicherheit', 'personen', 'einstellungen', 'rechte', 'events', 'programm', 'aufgaben', 'konzept', 'wirkungsmodell', 'migrationen') as $datei) {
   require $wurzel . '/src/' . $datei . '.php';
 }
 if (!istEingerichtet()) {
@@ -235,6 +235,29 @@ $camp['konzept'] = array(
   'zielgruppe' => array('beschreibung' => 'Jugendliche der Oberstufe aus der Kirchgemeinde und ihre Freundinnen und Freunde.', 'alter_von' => 13, 'alter_bis' => 16, 'anzahl' => 40,
     'besonderheiten' => 'Allergien und Medikamente über das Anmeldeformular erfassen. Geschlechtergetrennte Bungalows.'),
 );
+
+/* Wirkungsmodell: Vorschlag aus den Eventdaten, ergänzt um Leistungen, Impacts und Pfeile */
+$modell = wirkungsmodellLeer();
+$modell['titel'] = 'Wirkungsmodell BeachCamp 2026';
+$modell['verantwortung'] = 'Hannes Keller';
+wirkungsUebernehmen($modell, wirkungsVorschlag($camp, personenLesen()));
+$l = array(
+  wirkungsEintrag('leistungen', 'Storytime, Plenum und Kleingruppe', 'Täglicher Dreischritt zum Camp-Thema', array('indikator' => 'Teilnahme an mindestens fünf von sechs Tagen', 'status' => 'erreicht')),
+  wirkungsEintrag('leistungen', 'Tagesprogramme und Ausflüge', 'StrandDay, Mister X, SportsDay, Siena, Märt', array('indikator' => 'Alle Ausflüge nach Plan', 'status' => 'erreicht')),
+);
+$i = array(
+  wirkungsEintrag('impacts', 'Junge Menschen erleben Kirche als lebendige Gemeinschaft', ''),
+  wirkungsEintrag('impacts', 'Beziehungen über das Camp hinaus', 'Freundschaften und Kontakte zur Kirchgemeinde'),
+);
+$modell['eintraege'] = array_merge($modell['eintraege'], $l, $i);
+$outcomes = array_values(array_filter($modell['eintraege'], function ($e) { return $e['spalte'] === 'outcomes'; }));
+wirkungsVerbindungSetzen($modell, $l[0]['id'], $outcomes[0]['id'], true);
+wirkungsVerbindungSetzen($modell, $l[0]['id'], $outcomes[1]['id'], true);
+wirkungsVerbindungSetzen($modell, $l[1]['id'], $outcomes[2]['id'], true);
+wirkungsVerbindungSetzen($modell, $outcomes[0]['id'], $i[0]['id'], true);
+wirkungsVerbindungSetzen($modell, $outcomes[1]['id'], $i[1]['id'], true);
+wirkungsVerbindungSetzen($modell, $outcomes[2]['id'], $i[0]['id'], true);
+$camp['wirkungsmodell'] = $modell;
 speicherSchreiben('events/' . $camp['id'], $camp);
 
 /* ---------- Weg zur Konfirmation: Start-Tag mit vollständigem Ablaufplan ---------- */
