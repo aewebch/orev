@@ -32,6 +32,7 @@ app.component('app-leiste', {
         <leiste-eintrag v-if="zustand.ich.istAdmin" icon="settings" label="Einstellungen" :aktiv="$route.path === '/einstellungen'" :zaehler="zustand.updateVerfuegbar ? 1 : 0" class="nur-desktop" @click="gehe('/einstellungen')"></leiste-eintrag>
       </div>
       <div class="leiste__unten">
+        <leiste-eintrag icon="circle-help" label="Hilfe" :aktiv="$route.path === '/hilfe'" class="nur-desktop" @click="gehe('/hilfe')"></leiste-eintrag>
         <leiste-eintrag icon="search" label="Suchen" :aktiv="panel === 'suche'" @click="umschalten('suche')"></leiste-eintrag>
         <leiste-eintrag icon="user" label="Mitteilungen und Konto" :aktiv="panel === 'konto'" :zaehler="zustand.ungelesen" class="leiste__konto" @click="umschalten('konto')">
           <span class="leiste__avatar">{{ initialen }}</span>
@@ -81,6 +82,7 @@ app.component('app-leiste', {
       <div class="leiste-panel__abschnitt">{{ zustand.ich.vorname }} {{ zustand.ich.name }}</div>
       <div class="knopf-raster">
         <button type="button" class="knopf-kachel" @click="gehe('/konto')"><ae-icon name="user" :size="16"></ae-icon>Mein Konto</button>
+        <button type="button" class="knopf-kachel" @click="gehe('/hilfe')"><ae-icon name="circle-help" :size="16"></ae-icon>Hilfe</button>
         <button type="button" class="knopf-kachel knopf-kachel--gefahr" @click="abmelden"><ae-icon name="log-out" :size="16"></ae-icon>Abmelden</button>
       </div>
       <p class="fusszeile"><button type="button" class="text-link" @click="gehe('/datenschutz')">Datenschutz</button> · <a href="LICENSE" target="_blank" rel="noopener" class="text-link">Lizenz</a> · Orev {{ zustand.version }}</p>

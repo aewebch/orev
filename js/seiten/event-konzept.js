@@ -19,6 +19,7 @@ app.component('event-konzept', {
   inject: ['eventAktion'],
   template: `
     <ae-card title="Zielgruppe">
+      <template #actions><hilfe-punkt thema="zielgruppe"></hilfe-punkt></template>
       <div v-if="gruppe" class="stapel">
         <textarea v-if="darf" v-model="gruppe.beschreibung" v-wachsen class="nahtlos" rows="1" maxlength="5000" placeholder="Wen möchten wir erreichen?" aria-label="Beschreibung der Zielgruppe" @blur="gruppeSpeichern"></textarea>
         <p v-else class="ablauf__text">{{ gruppe.beschreibung || 'Noch nicht beschrieben.' }}</p>
@@ -47,6 +48,7 @@ app.component('event-konzept', {
     </ae-card>
 
     <ae-card title="Ziele" subtitle="Nach SMART: spezifisch, messbar, erreichbar, relevant, terminiert. In der Nachbereitung werden sie überprüft.">
+      <template #actions><hilfe-punkt thema="konzept"></hilfe-punkt></template>
       <div class="stapel">
         <div v-if="darf" class="neue-zeile">
           <ae-icon name="target" :size="18"></ae-icon>
@@ -280,6 +282,7 @@ app.component('event-reflexion', {
     </ae-card>
 
     <ae-card v-if="bewertungen" title="Ort und Unterkunft">
+      <template #actions><hilfe-punkt thema="bewertungen"></hilfe-punkt></template>
       <bewertung-zeile :titel="event.ort || 'Ort'" meta="Lage, Unterkunft, Infrastruktur, Verpflegung" :wert="bewertungen.ort" :darf="darf"
         platzhalter="Was hat gepasst, was fehlte? Würden wir wieder hierher gehen?" @speichern="bewerten('ort', '', $event)"></bewertung-zeile>
     </ae-card>
@@ -310,6 +313,7 @@ app.component('event-reflexion', {
     </ae-card>
 
     <ae-card title="Teamkultur" subtitle="Wie war das Miteinander im Team? Was nehmen wir mit?">
+      <template #actions><hilfe-punkt thema="reflexion"></hilfe-punkt></template>
       <textarea v-if="darf" v-model="teamkultur" v-wachsen class="nahtlos teamkultur" rows="3" maxlength="20000" placeholder="Auswertung des Miteinanders …" aria-label="Teamkultur" @blur="teamkulturSpeichern"></textarea>
       <p v-else class="ablauf__text">{{ teamkultur || 'Noch keine Auswertung.' }}</p>
     </ae-card>

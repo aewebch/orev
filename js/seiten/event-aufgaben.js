@@ -14,6 +14,8 @@ app.component('event-aufgaben', {
           <span class="stufen" role="radiogroup" aria-label="Ansicht">
             <button v-for="a in ansichten" :key="a.id" type="button" role="radio" :aria-checked="ansicht === a.id" :class="['stufe', ansicht === a.id ? 'stufe--aktiv' : '']" @click="ansicht = a.id">{{ a.label }} <span class="leise">{{ anzahl(a.id) }}</span></button>
           </span>
+          <span class="dehnen"></span>
+          <hilfe-punkt thema="aufgaben"></hilfe-punkt>
         </div>
 
         <div v-if="darfAnlegen" class="neue-zeile">

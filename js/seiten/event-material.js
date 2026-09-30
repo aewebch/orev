@@ -180,7 +180,8 @@ app.component('event-material', {
             <p class="leise">Erfasst wird Material dort, wo es gebraucht wird: im Ablaufplan oder bei einer Aufgabe.</p>
           </div>
           <span class="dehnen"></span>
-          <ae-button variant="tertiary" icon="printer" class="nicht-drucken" @click="drucken">Drucken</ae-button>
+          <hilfe-punkt thema="material" class="nicht-drucken"></hilfe-punkt>
+          <ae-icon-button label="Drucken" variant="flat" class="nicht-drucken" @click="drucken"><ae-icon name="printer" :size="18"></ae-icon></ae-icon-button>
         </div>
         <div class="werkzeuge nicht-drucken">
           <select v-model="halter" class="pille pille--auswahl" aria-label="Wer nimmt mit">

@@ -9,6 +9,7 @@ var SeiteMitteilungen = {
         </div>
         <div class="reihe">
           <button v-if="ungelesen" type="button" class="pille" @click="alleGelesen"><span class="pille__text">Alle als gelesen markieren</span></button>
+          <hilfe-punkt thema="mitteilungen"></hilfe-punkt>
           <pillen-menue label="Weitere Aktionen" rechts>
             <button type="button" class="menue-eintrag" @click="leeren">Gelesene entfernen</button>
           </pillen-menue>

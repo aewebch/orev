@@ -21,6 +21,7 @@ $skripte = array(
   'js/komponenten/navigation.js',
   'js/komponenten/orev.js',
   'js/komponenten/bedienung.js',
+  'js/kern/hilfe.js',
   'js/komponenten/leiste.js',
   'js/komponenten/kalender-abo.js',
   'js/seiten/einrichtung.js',

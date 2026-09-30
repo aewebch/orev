@@ -4,6 +4,7 @@ app.component('kalender-abo', {
   props: { eventId: { type: String, default: '' } },
   template: `
     <ae-card id="kalender" title="Kalender abonnieren" subtitle="Ihre Programmpunkte und Vorbereitungstermine erscheinen in Ihrem Kalender und aktualisieren sich von selbst.">
+      <template #actions><hilfe-punkt thema="kalender"></hilfe-punkt></template>
       <div v-if="ical" class="stapel">
         <template v-if="!ical.token">
           <ul class="kalender-inhalt">

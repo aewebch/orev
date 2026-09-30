@@ -4,7 +4,7 @@ app.component('event-rollen', {
   inject: ['eventAktion'],
   template: `
     <ae-card title="Rollen" subtitle="Eine Person kann mehrere Rollen haben; es gilt jeweils das höchste Recht.">
-      <template v-if="darf" #actions><ae-button variant="secondary" icon="plus" @click="oeffnen(null)">Rolle anlegen</ae-button></template>
+      <template #actions><span class="reihe"><hilfe-punkt thema="rollen"></hilfe-punkt><ae-button v-if="darf" variant="secondary" icon="plus" @click="oeffnen(null)">Rolle anlegen</ae-button></span></template>
       <ae-card-row v-for="r in event.rollen" :key="r.id" :title="r.name" :meta="rolleMeta(r)" interaktiv @click="oeffnen(r)">
         <template #leading><ae-avatar :name="r.name" :size="40"></ae-avatar></template>
         <template #trailing><ae-badge color="neutral">{{ anzahl(r) }}</ae-badge></template>

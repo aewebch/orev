@@ -11,14 +11,22 @@ var SeiteDashboard = {
       <div class="seite__kopf">
         <div>
           <p class="seite__kicker">{{ zustand.name }}</p>
-          <h1>{{ zustand.ich.istAdmin ? 'Events' : 'Meine Events' }}</h1>
+          <h1 class="reihe">{{ zustand.ich.istAdmin ? 'Events' : 'Meine Events' }} <hilfe-punkt thema="orev"></hilfe-punkt></h1>
         </div>
-        <ae-button v-if="zustand.darfEventsAnlegen" icon="plus" @click="neuOeffnen">Neues Event</ae-button>
+        <ae-button v-if="zustand.darfEventsAnlegen" icon="plus" class="nur-desktop" @click="neuOeffnen">Neues Event</ae-button>
       </div>
       <div class="mit-tabs">
         <ae-tabs v-model="tab" :tabs="tabs"></ae-tabs>
         <ae-card>
           <p v-if="events === null" class="leise">Lade …</p>
+          <div v-else-if="!liste.length && tab === 'kommende' && !events.length" class="einstieg">
+            <ae-icon name="calendar-days" :size="32"></ae-icon>
+            <h2>Willkommen bei Orev</h2>
+            <p v-if="zustand.darfEventsAnlegen">Legen Sie Ihr erstes Event oder Camp an. Danach führt Sie ein geführtes Setup Schritt für Schritt durch Ziele, Team, Rollen, Aufgaben und Material.</p>
+            <p v-else>Sobald Sie jemand zu einem Event hinzufügt, erscheint es hier. Ihre Aufgaben finden Sie dann unter «Meine Aufgaben».</p>
+            <ae-button v-if="zustand.darfEventsAnlegen" icon="plus" @click="neuOeffnen">Erstes Event anlegen</ae-button>
+            <router-link to="/hilfe" class="text-link">So funktioniert Orev</router-link>
+          </div>
           <p v-else-if="!liste.length" class="leer">{{ tab === 'kommende' ? 'Keine kommenden Events.' : 'Keine vergangenen Events.' }}</p>
           <ae-card-row v-for="e in liste" :key="e.id" :title="e.titel" :meta="meta(e)" interaktiv @click="$router.push('/event/' + e.id)">
             <template #leading><ae-avatar :name="e.titel" :size="40"></ae-avatar></template>

@@ -3,6 +3,8 @@
    (Ziehen), in der Länge ändern (Griff unten), Bausteine aus Vorlagen oder dem Event hineinziehen und freie Zeiten
    aufziehen. Auf Touch-Geräten öffnet ein Tippen auf eine freie Zeit denselben Dialog. */
 var RASTER_STUNDE = 80
+var PROGRAMM_SCHMAL = '(max-width: 899px)'
+var PROGRAMM_SCHMAL = '(max-width: 899px)'
 var RASTER_RASTER = 15
 
 /* Was gerade gezogen wird (HTML-Drag-and-Drop gibt die Daten erst beim Ablegen heraus) */
@@ -307,26 +309,40 @@ app.component('event-programm', {
   template: `
     <ae-card>
       <div class="stapel">
-        <div class="werkzeuge">
-          <span class="stufen" role="radiogroup" aria-label="Ansicht">
-            <button v-for="a in ansichten" :key="a.id" type="button" role="radio" :aria-checked="ansicht === a.id"
-              :class="['stufe', 'reihe', ansicht === a.id ? 'stufe--aktiv' : '']" @click="ansicht = a.id"><ae-icon :name="a.icon" :size="16"></ae-icon>{{ a.label }}</button>
+        <div class="programm-leiste">
+          <span class="stufen programm-leiste__ansicht" role="radiogroup" aria-label="Ansicht">
+            <button v-for="a in ansichten" :key="a.id" type="button" role="radio" :aria-checked="ansicht === a.id" :title="a.label"
+              :class="['stufe', 'reihe', ansicht === a.id ? 'stufe--aktiv' : '']" @click="ansicht = a.id"><ae-icon :name="a.icon" :size="16"></ae-icon><span class="programm-leiste__text">{{ a.label }}</span></button>
           </span>
+          <pillen-menue :text="filterText" :leer="!filterAktiv" panel class="programm-leiste__filter">
+            <div class="stapel stapel--eng">
+              <label class="auswahl-zeile"><input v-model="nurMeine" type="checkbox"> Nur mein Programm</label>
+              <template v-if="event.teams.length">
+                <span class="aufklapp__titel">Teams</span>
+                <div class="chips">
+                  <button v-for="t in event.teams" :key="t.id" type="button" :class="['chip', filterTeams.includes(t.id) ? 'chip--aktiv' : '']" @click="umschalten(filterTeams, t.id)"><farb-punkt :farbe="t.farbe"></farb-punkt>{{ t.name }}</button>
+                </div>
+              </template>
+              <span class="aufklapp__titel">Personen</span>
+              <div class="chips">
+                <button v-for="p in personenListe" :key="p.id" type="button" :class="['chip', filterPersonen.includes(p.id) ? 'chip--aktiv' : '']" @click="umschalten(filterPersonen, p.id)"><farb-punkt :farbe="p.farbe"></farb-punkt>{{ p.vorname }} {{ p.name }}</button>
+              </div>
+              <button v-if="filterAktiv" type="button" class="menue-eintrag" @click="filterLeeren">Filter zurücksetzen</button>
+            </div>
+          </pillen-menue>
           <span class="dehnen"></span>
-          <ae-button v-if="anlegen && ansicht !== 'liste'" variant="tertiary" icon="list" @click="bausteineOffen = !bausteineOffen">{{ bausteineOffen ? 'Bausteine ausblenden' : 'Bausteine' }}</ae-button>
-          <ae-button variant="tertiary" icon="calendar" @click="$router.push({ path: '/konto', query: { event: event.id } })">Abonnieren</ae-button>
-          <ae-button v-if="anlegen" variant="tertiary" icon="settings" @click="agendaOeffnen">Agenda</ae-button>
-          <ae-button v-if="anlegen" icon="plus" size="md" @click="oeffnen(null)">Programmpunkt</ae-button>
+          <hilfe-punkt :thema="ansicht === 'liste' ? 'programm' : 'agenda'"></hilfe-punkt>
+          <pillen-menue label="Weitere Aktionen" rechts>
+            <button v-if="anlegen && ansicht !== 'liste' && !schmal" type="button" class="menue-eintrag menue-eintrag--icon" @click="bausteineOffen = !bausteineOffen"><ae-icon name="list" :size="16"></ae-icon>{{ bausteineOffen ? 'Bausteine ausblenden' : 'Bausteine einblenden' }}</button>
+            <button v-if="anlegen" type="button" class="menue-eintrag menue-eintrag--icon" @click="agendaOeffnen"><ae-icon name="settings" :size="16"></ae-icon>Agenda-Einstellungen</button>
+            <button type="button" class="menue-eintrag menue-eintrag--icon" @click="$router.push({ path: '/konto', query: { event: event.id } })"><ae-icon name="calendar" :size="16"></ae-icon>Im Kalender abonnieren</button>
+          </pillen-menue>
+          <ae-button v-if="anlegen" icon="plus" size="md" class="programm-leiste__neu" :aria-label="'Programmpunkt hinzufügen'" @click="oeffnen(null)"><span class="programm-leiste__text">Programmpunkt</span></ae-button>
         </div>
-        <div class="werkzeuge">
-          <template v-if="ansicht === 'tag'">
-            <ae-icon-button label="Vorheriger Tag" variant="flat" :disabled="tagIndex === 0" @click="tagIndex--"><ae-icon name="chevron-left" :size="20"></ae-icon></ae-icon-button>
-            <ae-select v-model="tagDatum" :optionen="tagOptionen"></ae-select>
-            <ae-icon-button label="Nächster Tag" variant="flat" :disabled="tagIndex === event.tage.length - 1" @click="tagIndex++"><ae-icon name="chevron-right" :size="20"></ae-icon></ae-icon-button>
-          </template>
-          <ae-select v-model="filterTeam" :optionen="teamOptionen"></ae-select>
-          <ae-select v-model="filterPerson" :optionen="personOptionen"></ae-select>
-          <ae-checkbox v-model="nurMeine" label="Mein Programm"></ae-checkbox>
+        <div v-if="ansicht === 'tag'" class="tag-wahl">
+          <ae-icon-button label="Vorheriger Tag" variant="flat" :disabled="tagIndex === 0" @click="tagIndex--"><ae-icon name="chevron-left" :size="20"></ae-icon></ae-icon-button>
+          <ae-select v-model="tagDatum" :optionen="tagOptionen" class="dehnen"></ae-select>
+          <ae-icon-button label="Nächster Tag" variant="flat" :disabled="tagIndex === event.tage.length - 1" @click="tagIndex++"><ae-icon name="chevron-right" :size="20"></ae-icon></ae-icon-button>
         </div>
 
         <div v-if="ansicht !== 'liste'" :class="['agenda', mitBausteinen ? 'agenda--mit-bausteinen' : '']">
@@ -459,9 +475,10 @@ app.component('event-programm', {
       ansicht: window.innerWidth < 700 ? 'tag' : 'woche',
       ansichten: [{ id: 'woche', label: 'Woche', icon: 'calendar-days' }, { id: 'tag', label: 'Tag', icon: 'calendar' }, { id: 'liste', label: 'Liste', icon: 'list' }],
       tagIndex: 0,
-      filterTeam: '',
-      filterPerson: '',
+      filterTeams: [],
+      filterPersonen: [],
       nurMeine: false,
+      schmal: window.matchMedia(PROGRAMM_SCHMAL).matches,
       punkt: null,
       kopieTage: [],
       fehler: '',
@@ -478,6 +495,24 @@ app.component('event-programm', {
     if (i >= 0) this.tagIndex = i
     if (this.anlegen) this.vorlagenLaden()
   },
+  mounted() {
+    var komponente = this
+    this.medien = window.matchMedia(PROGRAMM_SCHMAL)
+    this.medienWechsel = function (e) { komponente.schmal = e.matches }
+    this.medien.addEventListener('change', this.medienWechsel)
+  },
+  beforeUnmount() {
+    this.medien.removeEventListener('change', this.medienWechsel)
+  },
+  mounted() {
+    var komponente = this
+    this.medien = window.matchMedia(PROGRAMM_SCHMAL)
+    this.medienWechsel = function (e) { komponente.schmal = e.matches }
+    this.medien.addEventListener('change', this.medienWechsel)
+  },
+  beforeUnmount() {
+    this.medien.removeEventListener('change', this.medienWechsel)
+  },
   computed: {
     anlegen() {
       return this.event.ich.darfProgrammAnlegen
@@ -485,8 +520,21 @@ app.component('event-programm', {
     darfVorlagen() {
       return zustand.ich.istAdmin || zustand.ich.darfEventsAnlegen
     },
+    /* Bausteine gibt es nur mit Maus (Ziehen); auf schmalen Bildschirmen fügt man über den Dialog ein */
     mitBausteinen() {
-      return this.anlegen && this.bausteineOffen
+      return this.anlegen && this.bausteineOffen && !this.schmal
+    },
+    filterAktiv() {
+      return this.nurMeine || this.filterTeams.length > 0 || this.filterPersonen.length > 0
+    },
+    /* Ein Feld für alle Filter: zeigt, was gesetzt ist */
+    filterText() {
+      if (!this.filterAktiv) return 'Alle Teams und Personen'
+      var event = this.event
+      var teile = this.nurMeine ? ['Mein Programm'] : []
+      teile = teile.concat(event.teams.filter(function (t) { return this.filterTeams.includes(t.id) }, this).map(function (t) { return t.name }))
+      teile = teile.concat(this.filterPersonen.map(function (id) { return personKurz(event.personen[id]) }))
+      return teile.join(', ')
     },
     bausteine() {
       return eventBausteine(this.event)
@@ -509,12 +557,6 @@ app.component('event-programm', {
     tagOptionen() {
       return this.event.tage.map(function (t) { return { wert: t.datum, text: wochentagText(t.datum) + ' ' + datumText(t.datum + 'T12:00:00') + (t.thema ? ' · ' + t.thema : '') } })
     },
-    teamOptionen() {
-      return [{ wert: '', text: 'Alle Teams' }].concat(this.event.teams.map(function (t) { return { wert: t.id, text: t.name } }))
-    },
-    personOptionen() {
-      return [{ wert: '', text: 'Alle Personen' }].concat(this.personenListe.map(function (p) { return { wert: p.id, text: personenName(p) } }))
-    },
     /* Punkte, für die die angemeldete Person direkt, über eines ihrer Teams oder in einem Ablaufschritt eingetragen ist */
     meineIds() {
       var ich = this.event.ich.personId
@@ -526,19 +568,21 @@ app.component('event-programm', {
         return betrifft(p.personen, p.teams) || (p.ablauf && p.ablauf.schritte.some(function (s) { return betrifft(s.wer.personen, s.wer.teams) }))
       }).map(function (p) { return p.id })
     },
+    /* Mehrfachfilter: ein Punkt bleibt, wenn er zu einem gewählten Team oder einer gewählten Person gehört
+       (auch über deren Teams); «Mein Programm» schränkt zusätzlich ein */
     gefiltert() {
-      var team = this.filterTeam
-      var person = this.filterPerson
+      var teamsWahl = this.filterTeams
+      var personenWahl = this.filterPersonen
       var meine = this.nurMeine ? this.meineIds : null
       var teams = this.event.teams
+      var mitAuswahl = teamsWahl.length > 0 || personenWahl.length > 0
       return this.event.programmpunkte.filter(function (p) {
         if (meine && !meine.includes(p.id)) return false
-        if (team && !p.teams.includes(team)) return false
-        if (person) {
-          var ueberTeam = teams.some(function (t) { return p.teams.includes(t.id) && t.mitglieder.some(function (m) { return m.personId === person }) })
-          if (!p.personen.includes(person) && !ueberTeam) return false
-        }
-        return true
+        if (!mitAuswahl) return true
+        if (p.teams.some(function (t) { return teamsWahl.includes(t) })) return true
+        return personenWahl.some(function (person) {
+          return p.personen.includes(person) || teams.some(function (t) { return p.teams.includes(t.id) && t.mitglieder.some(function (m) { return m.personId === person }) })
+        })
       })
     },
     ausserhalb() {
@@ -575,6 +619,11 @@ app.component('event-programm', {
       var i = liste.indexOf(wert)
       if (i >= 0) liste.splice(i, 1)
       else liste.push(wert)
+    },
+    filterLeeren() {
+      this.nurMeine = false
+      this.filterTeams = []
+      this.filterPersonen = []
     },
     stundenOptionen(von, bis) {
       var liste = []

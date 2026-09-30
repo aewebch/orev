@@ -348,7 +348,7 @@ select.pille--auswahl{appearance:none;padding-right:26px;background-image:url("d
   .liste__zeit{width:72px}
   .seite{padding:16px 16px 64px}
   .ae-card{padding:16px}
-  .event__flaeche{padding:16px}
+  .event__flaeche{padding:28px 16px 16px}
   .ae-row{padding:12px 16px;margin:0 -16px}
   .kopf__name{display:none}
   h1{font-size:var(--text-h2)}
@@ -501,3 +501,134 @@ select.pille--auswahl{appearance:none;padding-right:26px;background-image:url("d
 .datenschutz__text h2{margin:0 0 8px;font-size:var(--text-label)}
 .datenschutz__text p,.datenschutz__text ul{margin:0 0 8px;font-size:var(--text-small);line-height:1.6}
 .datenschutz__text ul{padding-left:20px}
+
+/* ---------- Event: Kopf, Phasen-Tabs, Setup-Assistent, Untertabs (mobile-first) ---------- */
+.event-kopf{display:flex;flex-direction:column;gap:2px;min-width:0}
+.event-kopf__titel{margin:0;overflow-wrap:anywhere}
+.event-kopf__thema{margin:0}
+/* Drei Phasen teilen sich die volle Breite: nie waagrecht scrollen, damit die umgekehrten Radien sichtbar bleiben */
+.event-phasen .ae-tabs{display:flex;gap:6px}
+.event-phasen .ae-tab{flex:1 1 0;min-width:0;justify-content:center;padding:12px 10px;white-space:nowrap}
+.event-phasen__text{overflow:hidden;text-overflow:ellipsis}
+.event-phasen__zahl{flex:none;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--color-primary);color:var(--color-white);font-size:11px;line-height:20px;text-align:center}
+.event__flaeche--letzter{border-top-right-radius:0}
+.event__flaeche--erster.event__flaeche--letzter{border-top-left-radius:0}
+/* Letzter Tab aktiv: die Rundung rechts entfällt, der Übergang links bleibt (Spiegelbild des ersten Tabs) */
+@supports (corner-shape:scoop){
+  .event-phasen .ae-tab--active:last-child::before{right:0;corner-shape:scoop scoop round scoop;border-top-right-radius:0}
+  .event-phasen .ae-tab--active:first-child:last-child::before{left:0;right:0}
+}
+@supports not (corner-shape:scoop){
+  .event-phasen .ae-tab--active:last-child::before{right:0;background:radial-gradient(circle at 0 0,transparent var(--radius-lg),var(--color-surface) calc(var(--radius-lg) + .5px)) left bottom/var(--radius-lg) 100% no-repeat}
+}
+
+.setup-kopf{display:flex;flex-direction:column;gap:14px}
+.setup-fortschritt{height:6px;border-radius:3px;background:var(--secondary-5);overflow:hidden}
+.setup-fortschritt__balken{display:block;height:100%;border-radius:3px;background:var(--color-success);transition:width .4s ease}
+.setup-schritte{display:flex;gap:6px;margin:0;padding:2px;list-style:none;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+.setup-schritte::-webkit-scrollbar{display:none}
+.setup-schritte li{flex:none;scroll-snap-align:center}
+.setup-schritt{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border:0;border-radius:var(--radius-pill);background:var(--color-page-bg);color:var(--color-text-muted);font:inherit;font-size:var(--text-small);cursor:pointer;transition:var(--transition);white-space:nowrap}
+.setup-schritt:hover{background:var(--secondary-10);color:var(--color-text)}
+.setup-schritt:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.setup-schritt__nummer{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:var(--radius-full);background:var(--color-surface);box-shadow:var(--shadow-ring);font-weight:var(--weight-bold);font-size:var(--text-caption)}
+.setup-schritt--erledigt .setup-schritt__nummer{background:var(--color-success);color:var(--color-white);box-shadow:none}
+.setup-schritt--aktiv{background:var(--color-secondary);color:var(--color-white);font-weight:var(--weight-bold)}
+.setup-schritt--aktiv:hover{background:var(--color-secondary);color:var(--color-white)}
+.setup-schritt--aktiv .setup-schritt__nummer{color:var(--color-secondary)}
+.setup-schritt--aktiv.setup-schritt--erledigt .setup-schritt__nummer{color:var(--color-white)}
+.setup-frage{display:flex;gap:12px;align-items:flex-start;padding-bottom:4px;border-bottom:var(--border-default)}
+.setup-frage__schritt{margin:0;font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:var(--tracking-button);color:var(--color-primary)}
+.setup-frage__titel{display:flex;align-items:center;gap:8px;margin:2px 0 4px;font-size:var(--text-h3)}
+.setup-frage .leise{margin:0 0 10px}
+.setup-weiter{position:sticky;bottom:12px;z-index:5;display:flex;align-items:center;gap:8px;margin-top:8px;padding:10px;border-radius:var(--radius-pill);background:var(--color-surface);box-shadow:var(--shadow-card),var(--shadow-ring)}
+.setup-hinweis{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:0;border-radius:var(--radius-lg);background:var(--primary-5);color:var(--color-text);font:inherit;font-size:var(--text-small);text-align:left;cursor:pointer}
+.setup-hinweis:hover{background:var(--primary-10)}
+
+.untertabs{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px;margin:-4px 0 0}
+.untertabs::-webkit-scrollbar{display:none}
+.untertab{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:0;border-radius:var(--radius-pill);background:var(--color-page-bg);color:var(--color-text-muted);font:inherit;font-size:var(--text-small);font-weight:var(--weight-bold);cursor:pointer;white-space:nowrap;transition:var(--transition)}
+.untertab:hover{background:var(--secondary-10);color:var(--color-text)}
+.untertab:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.untertab--aktiv,.untertab--aktiv:hover{background:var(--color-secondary);color:var(--color-white)}
+.untertabs__hilfe{margin-left:auto;flex:none}
+
+/* Hilfe-Punkt: kleiner Kreis mit Fragezeichen, Blase mit Kurzhilfe */
+.hilfe-punkt{position:relative;display:inline-flex;vertical-align:middle}
+.hilfe-punkt__knopf{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;padding:0;border:1.5px solid currentColor;border-radius:var(--radius-full);background:transparent;color:var(--color-text-muted);font:inherit;font-size:12px;font-weight:var(--weight-bold);line-height:1;cursor:pointer;opacity:.75;transition:var(--transition)}
+.hilfe-punkt__knopf:hover,.hilfe-punkt__knopf[aria-expanded=true]{opacity:1;color:var(--color-primary)}
+.hilfe-punkt__knopf:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.hilfe-punkt__blase{position:absolute;z-index:45;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:min(300px,calc(100vw - 32px));display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:var(--shadow-card),var(--shadow-ring);font-size:var(--text-small);font-weight:var(--weight-regular);line-height:1.5;color:var(--color-text);text-transform:none;letter-spacing:normal;text-align:left}
+.hilfe__gruppe{margin:8px 0 0;font-size:var(--text-label)}
+.hilfe__thema{border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:var(--shadow-ring);padding:4px 16px}
+.hilfe__thema[open]{padding-bottom:12px}
+.hilfe__kopf{padding:12px 0;font-weight:var(--weight-bold);cursor:pointer}
+.hilfe__thema p{margin:0 0 8px;font-size:var(--text-small);line-height:1.6}
+.hilfe__kurz{color:var(--color-text-muted)}
+
+@media (max-width:700px){
+  .seite--event{gap:12px}
+  .event-kopf__titel{font-size:var(--text-h3)}
+  .event-phasen .ae-tabs{gap:4px}
+  .event-phasen .ae-tab{padding:10px 6px;font-size:var(--text-small);gap:6px}
+  .event__flaeche{gap:16px}
+  .setup-frage__titel{font-size:var(--text-label)}
+  .setup-weiter{bottom:88px;border-radius:var(--radius-lg)}
+  .setup-weiter .ae-btn{flex:1 1 auto;justify-content:center}
+  .setup-schritt__text{max-width:140px;overflow:hidden;text-overflow:ellipsis}
+  .hilfe-punkt__blase{position:fixed;top:auto;bottom:92px;left:16px;right:16px;width:auto;transform:none}
+}
+@media (max-width:400px){
+  .event-phasen__icon{display:none}
+}
+
+/* Programm: eine Werkzeugleiste (Ansicht, ein Filter, Hilfe, «⋮», neuer Punkt); auf dem Handy volle Breite */
+.programm-leiste{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.programm-leiste__filter .pille{max-width:24rem}
+.menue-eintrag--icon{display:flex;align-items:center;gap:10px}
+.tag-wahl{display:flex;align-items:center;gap:6px}
+.tag-wahl .feld{flex:1;min-width:0}
+@media (max-width:899px){
+  .programm-leiste__ansicht{order:1;flex:1 1 auto}
+  .programm-leiste__ansicht .stufe{flex:1;justify-content:center}
+  .programm-leiste .dehnen{display:none}
+  .programm-leiste .hilfe-punkt{order:2}
+  .programm-leiste .aufklapp:not(.programm-leiste__filter){order:3}
+  .programm-leiste__neu{order:4}
+  .programm-leiste__filter{order:5;flex:1 1 100%}
+  .programm-leiste__filter .pille{max-width:none;width:100%;justify-content:space-between;padding:8px 14px}
+  .programm-leiste__neu{width:44px;height:44px;padding:0;border-radius:var(--radius-full);justify-content:center}
+  .programm-leiste__neu .programm-leiste__text{display:none}
+}
+@media (max-width:420px){
+  .programm-leiste__ansicht .programm-leiste__text{display:none}
+}
+
+/* Grunddaten und Tage */
+.grunddaten__titel{font-size:var(--text-h3);font-weight:var(--weight-bold);margin:0}
+.grunddaten__felder{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 24px}
+.grunddaten__feld{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-md);background:var(--color-page-bg);color:var(--color-text-muted)}
+.grunddaten__feld .nahtlos{color:var(--color-text)}
+.grunddaten__feld:focus-within{box-shadow:var(--shadow-focus)}
+.tage{display:flex;flex-direction:column}
+.tag-zeile{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:center;padding:10px 0;border-bottom:var(--border-default)}
+.tag-zeile:last-child{border-bottom:0}
+.tag-zeile__datum{font-weight:var(--weight-bold);font-size:var(--text-label)}
+.tag-zeile__inhalt{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tag-zeile__inhalt .nahtlos{flex:1 1 180px;width:auto}
+
+/* Handy: Auswahl-Pillen und Eingabezeilen nehmen die ganze Breite ein */
+@media (max-width:700px){
+  .werkzeuge>select.pille--auswahl{flex:1 1 100%;max-width:none}
+  .neue-zeile{flex-wrap:wrap}
+  .neue-zeile select.pille{flex:1 1 100%;max-width:none}
+  .wm__aktionen{width:100%;flex-wrap:nowrap}
+  .wm__aktionen>.ae-btn{flex:1 1 auto;justify-content:center}
+  .seite__kopf{align-items:flex-start}
+}
+
+/* Einstieg ohne Events */
+.einstieg{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 16px;text-align:center;color:var(--color-text-muted)}
+.einstieg h2{margin:0;color:var(--color-text);font-size:var(--text-h3)}
+.einstieg p{margin:0;max-width:440px;font-size:var(--text-small);line-height:1.6}
+.einstieg .ae-icon{color:var(--color-primary)}

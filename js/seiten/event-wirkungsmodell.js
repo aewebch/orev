@@ -44,10 +44,14 @@ app.component('event-wirkungsmodell', {
             <span v-if="modell.geaendertAm">Zuletzt bearbeitet: {{ datumText(modell.geaendertAm) }}</span>
           </div>
         </div>
-        <div class="reihe nicht-drucken">
+        <div class="reihe nicht-drucken wm__aktionen">
           <ae-button v-if="darf && !vorschau" variant="secondary" icon="sparkles" @click="uebernehmen">Aus dem Event übernehmen</ae-button>
-          <ae-button variant="tertiary" :icon="vorschau ? 'x' : 'maximize-2'" @click="vorschau = !vorschau">{{ vorschau ? 'Vorschau schliessen' : 'Vorschau' }}</ae-button>
-          <ae-button variant="tertiary" icon="printer" @click="drucken">A3 drucken</ae-button>
+          <ae-button v-if="vorschau" variant="tertiary" icon="x" @click="vorschau = false">Vorschau schliessen</ae-button>
+          <hilfe-punkt thema="wirkungsmodell"></hilfe-punkt>
+          <pillen-menue label="Weitere Aktionen" rechts>
+            <button v-if="!vorschau" type="button" class="menue-eintrag menue-eintrag--icon" @click="vorschau = true"><ae-icon name="maximize-2" :size="16"></ae-icon>Vorschau</button>
+            <button type="button" class="menue-eintrag menue-eintrag--icon" @click="drucken"><ae-icon name="printer" :size="16"></ae-icon>A3 drucken oder als PDF sichern</button>
+          </pillen-menue>
         </div>
       </div>
 

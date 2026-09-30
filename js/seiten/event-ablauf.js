@@ -11,6 +11,7 @@ app.component('event-ablauf', {
   inject: ['eventAktion'],
   template: `
     <ae-card v-if="!punktId" title="Ablaufpläne" subtitle="Jeder Programmpunkt hat einen Ablaufplan. Wählen Sie einen Punkt.">
+      <template #actions><hilfe-punkt thema="ablaufplan"></hilfe-punkt></template>
       <p v-if="!liste.length" class="leer">Keine Programmpunkte, deren Ablaufplan Sie sehen dürfen.</p>
       <template v-for="gruppe in liste" :key="gruppe.datum">
         <h4 class="liste__tag">{{ wochentagText(gruppe.datum) }} {{ datumText(gruppe.datum + 'T12:00:00') }}</h4>
@@ -25,7 +26,8 @@ app.component('event-ablauf', {
       <div class="werkzeuge nicht-drucken">
         <ae-button variant="tertiary" icon="arrow-left" @click="zeigen('')">Alle Ablaufpläne</ae-button>
         <span class="dehnen"></span>
-        <ae-button v-if="punkt" variant="tertiary" icon="printer" @click="drucken">Drucken</ae-button>
+        <hilfe-punkt thema="ablaufplan"></hilfe-punkt>
+        <ae-icon-button v-if="punkt" label="Drucken" variant="flat" @click="drucken"><ae-icon name="printer" :size="18"></ae-icon></ae-icon-button>
       </div>
       <ae-card v-if="!punkt" padding="even"><ae-alert tone="danger">Diesen Ablaufplan gibt es nicht, oder Sie dürfen ihn nicht sehen.</ae-alert></ae-card>
       <template v-else>

@@ -4,7 +4,7 @@ app.component('event-personen', {
   inject: ['eventAktion', 'eventMeldung'],
   template: `
     <ae-card title="Personen" :subtitle="mitglieder.length + (mitglieder.length === 1 ? ' Person' : ' Personen')">
-      <template v-if="darf" #actions><ae-button variant="secondary" icon="user-plus" @click="hinzufuegenOeffnen">Person hinzufügen</ae-button></template>
+      <template #actions><span class="reihe"><hilfe-punkt thema="personen"></hilfe-punkt><ae-button v-if="darf" variant="secondary" icon="user-plus" @click="hinzufuegenOeffnen">Person hinzufügen</ae-button></span></template>
       <ae-card-row v-for="m in mitglieder" :key="m.person.id" :title="personenName(m.person)" :meta="personMeta(m)" :interaktiv="darf" @click="darf && personOeffnen(m)">
         <template #leading><ae-avatar :name="m.person.vorname + ' ' + m.person.name" :size="40"></ae-avatar></template>
         <template #trailing>
@@ -18,7 +18,7 @@ app.component('event-personen', {
     </ae-card>
 
     <ae-card title="Teams">
-      <template v-if="darf" #actions><ae-button variant="secondary" icon="plus" @click="teamOeffnen(null)">Team anlegen</ae-button></template>
+      <template #actions><span class="reihe"><hilfe-punkt thema="teams"></hilfe-punkt><ae-button v-if="darf" variant="secondary" icon="plus" @click="teamOeffnen(null)">Team anlegen</ae-button></span></template>
       <p v-if="!event.teams.length" class="leer">Noch keine Teams.</p>
       <ae-card-row v-for="t in event.teams" :key="t.id" :title="t.name" :meta="teamMeta(t)" :interaktiv="darfTeam(t)" @click="darfTeam(t) && teamOeffnen(t)">
         <template #leading><ae-avatar :name="t.name" :size="40"></ae-avatar></template>
