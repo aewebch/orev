@@ -26,6 +26,8 @@ app.component('event-personen', {
       </ae-card-row>
     </ae-card>
 
+    <event-freigaben v-if="event.ich.hatLeitungsrechte" :event="event"></event-freigaben>
+
     <ae-modal v-if="hinzufuegen" title="Person hinzufügen" @schliessen="hinzufuegen = null">
       <div class="formular">
         <ae-tabs v-model="hinzufuegen.art" :tabs="[{ id: 'suche', label: 'Aus dem Verzeichnis' }, { id: 'neu', label: 'Neu erfassen' }]"></ae-tabs>

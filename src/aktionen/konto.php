@@ -115,3 +115,16 @@ function aktionPasswortAendern() {
   sitzungsCookieSetzen($token);
   antwort(array('ok' => true));
 }
+
+/* Einführung gesehen oder übersprungen: am Konto vermerkt, damit sie auf keinem Gerät erneut von selbst startet.
+   Über das Konto-Menü lässt sie sich jederzeit wieder aufrufen. */
+function aktionEinfuehrungSpeichern() {
+  nurPost();
+  $ich = pflichtAnmeldung();
+  $gesehen = feld('gesehen', true) === true;
+  personenAendern(function (&$personen) use ($ich, $gesehen) {
+    $i = personIndex($personen, $ich['id']);
+    $personen[$i]['konto']['einfuehrung_gesehen'] = $gesehen;
+  });
+  antwort(array('ok' => true));
+}

@@ -1,10 +1,10 @@
 /* Eingebaute Dokumentation. Jedes Thema hat eine Kurzfassung (für die Hilfe-Punkte «?» direkt in der Oberfläche)
    und ausführliche Absätze für die Hilfe-Seite (/hilfe). Die Reihenfolge folgt dem Ablauf eines Events. */
 var HILFE_GRUPPEN = [
-  { titel: 'Erste Schritte', themen: ['orev', 'setup', 'navigation'] },
-  { titel: 'Setup', themen: ['grunddaten', 'tage', 'konzept', 'zielgruppe', 'personen', 'teams', 'rollen', 'aufgaben', 'vorbereitungstermine', 'material'] },
+  { titel: 'Erste Schritte', themen: ['orev', 'einfuehrung', 'setup', 'navigation'] },
+  { titel: 'Setup', themen: ['grunddaten', 'tage', 'konzept', 'zielgruppe', 'personen', 'teams', 'freigaben', 'rollen', 'aufgaben', 'vorbereitungstermine', 'material'] },
   { titel: 'Durchführung', themen: ['programm', 'agenda', 'bausteine', 'ablaufplan'] },
-  { titel: 'Nachbereitung', themen: ['reflexion', 'bewertungen', 'wirkungsmodell', 'feedback'] },
+  { titel: 'Nachbereitung', themen: ['reflexion', 'bewertungen', 'wirkungsmodell', 'feedback', 'bericht'] },
   { titel: 'Rund um Orev', themen: ['mitteilungen', 'suche', 'kalender', 'datenschutz'] },
 ]
 
@@ -15,6 +15,14 @@ var HILFE = {
     absaetze: [
       'Ein Event durchläuft drei Phasen: Im Setup legen Sie fest, worum es geht, wer mitmacht und was vorzubereiten ist. In der Durchführung planen Sie das Programm und die Abläufe. In der Nachbereitung werten Sie aus, was gelungen ist.',
       'Jede Person sieht nur, was sie laut ihren Rollen sehen darf. Was Sie selbst betrifft, finden Sie unter «Meine Aufgaben», in den Mitteilungen und auf Wunsch in Ihrem eigenen Kalender.',
+    ],
+  },
+  einfuehrung: {
+    titel: 'Einführung',
+    kurz: 'Eine kurze Tour zeigt die wichtigsten Stellen, passend zu Ihren Rechten. Sie starten sie jederzeit im Konto-Menü unter «Einführung».',
+    absaetze: [
+      'Die Einführung startet bei der ersten Anmeldung von selbst. Sie können sie mit «Überspringen» beenden und später wieder aufrufen: im Konto-Menü (Ihr Kürzel in der Leiste) oder hier mit «Einführung starten».',
+      'Gehören Sie schon zu einem Event, zeigt die Tour auch dessen Bereiche, und zwar nur jene, die Sie sehen dürfen.',
     ],
   },
   setup: {
@@ -73,6 +81,15 @@ var HILFE = {
     titel: 'Teams',
     kurz: 'Teams bündeln Personen, zum Beispiel Küche oder Sanität. Wer einem Team angehört, ist für alles zuständig, was dem Team zugewiesen ist.',
     absaetze: ['Eine Team-Leitung verwaltet ihr Team und darf alles bearbeiten, was dem Team zugewiesen ist.'],
+  },
+  freigaben: {
+    titel: 'Freigabe-Links',
+    kurz: 'Mit einem Link laden Sie Personen ein, ohne sie einzeln zu erfassen. Wer ihn öffnet, erhält die Rollen und Teams des Links.',
+    absaetze: [
+      'Links erstellt und verwaltet die Event-Leitung im Setup-Schritt «Personen». Pro Link legen Sie Bezeichnung, Rollen, Teams und die Gültigkeit fest. Standard ist unbegrenzt; mit einem Datum gilt der Link bis und mit diesem Tag.',
+      'Wer noch kein Konto hat, eröffnet beim Öffnen des Links eines. Wer eines hat, meldet sich an; wer schon angemeldet ist, wird sofort verknüpft. Bestehende Mitglieder erhalten zusätzlich die Rollen des Links, verlieren aber keine.',
+      'Ist ein Link in falsche Hände geraten, erneuern Sie ihn im Menü «⋮»: Der alte funktioniert dann nicht mehr. Bereits beigetretene Personen bleiben im Event, bis Sie sie entfernen.',
+    ],
   },
   rollen: {
     titel: 'Rollen und Rechte',
@@ -153,6 +170,16 @@ var HILFE = {
     kurz: 'Daumen: gut. Zeigefinger: merke ich mir. Mittelfinger: würde ich ändern. Ringfinger: ging mir nahe. Kleiner Finger: kam zu kurz.',
     absaetze: ['Beantworten Sie, was Ihnen etwas sagt. Ihr Feedback sehen nur Sie und die Event-Leitung.'],
   },
+  bericht: {
+    titel: 'Auswertungsbericht',
+    kurz: 'Orev schreibt aus Zielüberprüfung, Bewertungen, Wirkungsmodell und Feedback einen Bericht mit Inhaltsverzeichnis, Seitenzahlen und Quellen.',
+    absaetze: [
+      'Der Bericht entsteht automatisch und ist immer aktuell: Ändern Sie etwas in der Reflexion, im Wirkungsmodell oder im Feedback, passt sich der Text sofort an. Er enthält eine Zusammenfassung, Ausgangslage und Ziele, die Zielüberprüfung, die Durchführung, die Wirkungen, die Rückmeldungen aus dem Team sowie Folgerungen und Empfehlungen.',
+      'Zentrale Aussagen folgen dem argumentativen Dreischritt: zuerst die Behauptung, dann die Begründung, schliesslich ein Beleg oder Beispiel. Jeder Beleg verweist mit einer hochgestellten Zahl auf das Quellenverzeichnis am Schluss. Im Menü «⋮» lässt sich der Dreischritt farbig hervorheben.',
+      'Rückmeldungen erscheinen anonymisiert und nur, wenn sie an das ganze Team gerichtet sind. Sie fliessen nur in den Bericht von Personen ein, die das Feedback lesen dürfen.',
+      'Die Ansicht «Seiten» zeigt den Bericht als A4-Seiten mit Titelblatt; so wird er auch gedruckt oder als PDF gesichert. Auf dem Handy ist die Ansicht «Lesen» angenehmer.',
+    ],
+  },
   mitteilungen: {
     titel: 'Mitteilungen',
     kurz: 'Sie erfahren, was sich geändert hat: persönlich, wenn es Sie betrifft, sonst allgemein, sofern Sie es sehen dürfen.',
@@ -220,6 +247,7 @@ var SeiteHilfe = {
         <p class="seite__kicker">Hilfe</p>
         <h1>So funktioniert Orev</h1>
       </div>
+      <div v-if="angemeldet"><ae-button variant="secondary" icon="compass" @click="einfuehrungStarten()">Einführung starten</ae-button></div>
       <label class="suchfeld">
         <ae-icon name="search" :size="18"></ae-icon>
         <input v-model="suche" type="search" placeholder="Wonach suchen Sie?" aria-label="Hilfe durchsuchen">
@@ -237,7 +265,10 @@ var SeiteHilfe = {
     </main>
   `,
   data() {
-    return { suche: '', version: zustand.version }
+    return { suche: '', version: zustand.version, angemeldet: !!zustand.ich }
+  },
+  methods: {
+    einfuehrungStarten: function () { einfuehrungStarten() },
   },
   computed: {
     thema() {

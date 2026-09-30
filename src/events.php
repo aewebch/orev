@@ -66,6 +66,7 @@ function neuesEvent($felder, $erstellerId, $vorlagen) {
     'reflexion' => reflexionLeer(),
     'feedbacks' => array(),
     'wirkungsmodell' => wirkungsmodellLeer(),
+    'freigaben' => array(),
   ));
 }
 
@@ -178,6 +179,7 @@ function eventOeffentlich($event, $wer, $personen) {
       );
     }
   }
+  $sicht['freigaben'] = hatLeitungsrechte($event, $wer) ? freigabenOeffentlich($event) : array();
   $sicht['ich'] = array(
     'personId' => $personId,
     'recht' => $recht,

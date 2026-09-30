@@ -376,6 +376,7 @@ function aktionTeamLoeschen() {
   eventAendern($id, function (&$event) use ($teamId) {
     $event['teams'] = array_values(array_filter($event['teams'], function ($t) use ($teamId) { return $t['id'] !== $teamId; }));
     teamAusProgrammEntfernen($event, $teamId);
+    freigabenBereinigen($event);
   });
   foreach ($event['teams'] as $team) {
     if ($team['id'] !== $teamId) continue;
@@ -453,6 +454,7 @@ function aktionRolleLoeschen() {
     foreach ($event['mitglieder'] as $i => $m) {
       $event['mitglieder'][$i]['rollen'] = array_values(array_diff($m['rollen'], array($rolleId)));
     }
+    freigabenBereinigen($event);
   });
   eventAntwort($id, $ich);
 }

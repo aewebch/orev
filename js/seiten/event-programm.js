@@ -309,12 +309,12 @@ app.component('event-programm', {
   template: `
     <ae-card>
       <div class="stapel">
-        <div class="programm-leiste">
+        <div class="programm-leiste" data-tour="programm">
           <span class="stufen programm-leiste__ansicht" role="radiogroup" aria-label="Ansicht">
             <button v-for="a in ansichten" :key="a.id" type="button" role="radio" :aria-checked="ansicht === a.id" :title="a.label"
               :class="['stufe', 'reihe', ansicht === a.id ? 'stufe--aktiv' : '']" @click="ansicht = a.id"><ae-icon :name="a.icon" :size="16"></ae-icon><span class="programm-leiste__text">{{ a.label }}</span></button>
           </span>
-          <pillen-menue :text="filterText" :leer="!filterAktiv" panel class="programm-leiste__filter">
+          <pillen-menue :text="filterText" :leer="!filterAktiv" panel class="programm-leiste__filter" data-tour="programm-filter">
             <div class="stapel stapel--eng">
               <label class="auswahl-zeile"><input v-model="nurMeine" type="checkbox"> Nur mein Programm</label>
               <template v-if="event.teams.length">

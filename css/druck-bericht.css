@@ -1,0 +1,13 @@
+/* Druck des Auswertungsberichts: A4 hoch ohne Rand, jede Bildschirmseite ist eine Druckseite.
+   Wird nur beim Drucken aus dem Bericht eingehängt (js/seiten/event-bericht.js). */
+@page{size:A4 portrait;margin:0}
+@media print{
+  html,body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .event-kopf,.event-phasen,.untertabs,.setup-hinweis,.leiste,.leiste-panel,.bericht-lesen,.nicht-drucken,.ae-alert{display:none !important}
+  .mit-leiste,.seite,.event,.event__flaeche{padding:0 !important;margin:0 !important;max-width:none !important;box-shadow:none !important;background:none !important;border-radius:0 !important}
+  .bericht-rahmen{display:block !important;overflow:visible}
+  .bericht-skala{height:auto !important}
+  .bericht-skala__innen{transform:none !important;display:block;width:auto}
+  .bericht-seite{box-shadow:none;border-radius:0;margin:0;break-after:page;page-break-after:always}
+  .bericht-seite:last-child{break-after:auto;page-break-after:auto}
+}

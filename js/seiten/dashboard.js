@@ -15,7 +15,7 @@ var SeiteDashboard = {
         </div>
         <ae-button v-if="zustand.darfEventsAnlegen" icon="plus" class="nur-desktop" @click="neuOeffnen">Neues Event</ae-button>
       </div>
-      <div class="mit-tabs">
+      <div class="mit-tabs" data-tour="events">
         <ae-tabs v-model="tab" :tabs="tabs"></ae-tabs>
         <ae-card>
           <p v-if="events === null" class="leise">Lade …</p>

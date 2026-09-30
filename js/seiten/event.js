@@ -31,9 +31,22 @@ var EVENT_PHASEN = [
   { id: 'nachbereitung', label: 'Nachbereitung', icon: 'lightbulb', bereiche: [
     { id: 'reflexion', label: 'Reflexion', icon: 'lightbulb', recht: 'reflexion', komponente: 'event-reflexion', hilfe: 'reflexion' },
     { id: 'wirkungsmodell', label: 'Wirkungsmodell', icon: 'workflow', recht: 'reflexion', komponente: 'event-wirkungsmodell', hilfe: 'wirkungsmodell' },
+    { id: 'bericht', label: 'Bericht', icon: 'file-text', recht: 'reflexion', komponente: 'event-bericht', hilfe: 'bericht' },
     { id: 'feedback', label: 'Feedback', icon: 'message-square', recht: 'feedback', komponente: 'event-feedback', hilfe: 'feedback' },
   ] },
 ]
+
+/* Phasen mit den Bereichen, für die die Person mindestens Leserecht hat; Grunddaten sehen alle Mitglieder.
+   Zuständige und Halter sehen ihre Aufgaben und ihr Material auch ohne Recht; Feedback schreibt jedes Mitglied.
+   Die Einführung (js/kern/einfuehrung.js) nutzt dieselbe Auswahl. */
+function sichtbarePhasen(event) {
+  var recht = event.ich.recht
+  var sichtbar = function (b) {
+    return b.id === 'uebersicht' || recht[b.recht] >= 1 || (b.id === 'aufgaben' && event.aufgaben.length > 0)
+      || (b.id === 'material' && event.material.length > 0) || (b.id === 'feedback' && event.ich.istMitglied)
+  }
+  return EVENT_PHASEN.map(function (p) { return Object.assign({}, p, { bereiche: p.bereiche.filter(sichtbar) }) }).filter(function (p) { return p.bereiche.length })
+}
 
 /* Scrollt einen waagrechten Bereich so, dass das aktive Element sichtbar und möglichst mittig ist */
 function aktivesMittig(behaelter) {
@@ -57,9 +70,9 @@ var SeiteEvent = {
         </div>
 
         <div class="event">
-          <nav class="event-phasen nicht-drucken" aria-label="Phasen des Events">
+          <nav class="event-phasen nicht-drucken" aria-label="Phasen des Events" data-tour="phasen">
             <div role="tablist" class="ae-tabs">
-              <button v-for="p in phasen" :key="p.id" type="button" role="tab" :aria-selected="p.id === phase.id"
+              <button v-for="p in phasen" :key="p.id" type="button" role="tab" :data-tour="'phase-' + p.id" :aria-selected="p.id === phase.id"
                 :class="['ae-tab', p.id === phase.id ? 'ae-tab--active' : '']" @click="phaseOeffnen(p)">
                 <ae-icon :name="p.icon" :size="16" class="event-phasen__icon"></ae-icon><span class="event-phasen__text">{{ p.label }}</span>
                 <span v-if="p.id === 'setup' && setupOffen" class="event-phasen__zahl" :title="setupOffen + ' Schritte offen'">{{ setupOffen }}</span>
@@ -69,13 +82,13 @@ var SeiteEvent = {
 
           <div :class="['event__flaeche', phaseIndex === 0 ? 'event__flaeche--erster' : '', phaseIndex === phasen.length - 1 ? 'event__flaeche--letzter' : '']">
             <template v-if="phase.assistent">
-              <div class="setup-kopf nicht-drucken">
+              <div class="setup-kopf nicht-drucken" data-tour="setup">
                 <div class="setup-fortschritt" role="progressbar" :aria-valuenow="setupErledigt" aria-valuemin="0" :aria-valuemax="phase.bereiche.length" :aria-label="'Setup ' + setupErledigt + ' von ' + phase.bereiche.length + ' erledigt'">
                   <span class="setup-fortschritt__balken" :style="{ width: (setupErledigt / phase.bereiche.length * 100) + '%' }"></span>
                 </div>
                 <ol ref="schritte" class="setup-schritte" role="tablist" aria-label="Setup-Schritte">
                   <li v-for="(b, i) in phase.bereiche" :key="b.id">
-                    <button type="button" role="tab" :aria-selected="b.id === aktiv.id" :aria-current="b.id === aktiv.id ? 'step' : null"
+                    <button type="button" role="tab" :data-tour="'schritt-' + b.id" :aria-selected="b.id === aktiv.id" :aria-current="b.id === aktiv.id ? 'step' : null"
                       :class="['setup-schritt', b.id === aktiv.id ? 'setup-schritt--aktiv' : '', b.erledigt(event) ? 'setup-schritt--erledigt' : '']" @click="oeffnen(b.id)">
                       <span class="setup-schritt__nummer"><ae-icon v-if="b.erledigt(event)" name="check" :size="14"></ae-icon><template v-else>{{ i + 1 }}</template></span>
                       <span class="setup-schritt__text">{{ b.kurz || b.label }}</span>
@@ -92,7 +105,7 @@ var SeiteEvent = {
               </div>
             </template>
             <nav v-else-if="phase.bereiche.length > 1" ref="untertabs" class="untertabs nicht-drucken" role="tablist" :aria-label="phase.label">
-              <button v-for="b in phase.bereiche" :key="b.id" type="button" role="tab" :aria-selected="b.id === aktiv.id"
+              <button v-for="b in phase.bereiche" :key="b.id" type="button" role="tab" :data-tour="'bereich-' + b.id" :aria-selected="b.id === aktiv.id"
                 :class="['untertab', b.id === aktiv.id ? 'untertab--aktiv' : '']" @click="oeffnen(b.id)">
                 <ae-icon :name="b.icon" :size="16"></ae-icon>{{ b.kurz || b.label }}
               </button>
@@ -109,12 +122,12 @@ var SeiteEvent = {
             <component :is="aktiv.komponente" :event="event" v-bind="['ablauf', 'aufgaben'].includes(aktiv.id) ? { punktId: punktId } : {}"></component>
 
             <div v-if="phase.assistent" class="setup-weiter nicht-drucken">
-              <ae-button v-if="schrittIndex > 0" variant="tertiary" icon="arrow-left" @click="oeffnen(phase.bereiche[schrittIndex - 1].id)">Zurück</ae-button>
-              <span class="dehnen"></span>
+              <ae-icon-button v-if="schrittIndex > 0" label="Zurück" variant="flat" class="setup-weiter__zurueck" @click="oeffnen(phase.bereiche[schrittIndex - 1].id)"><ae-icon name="arrow-left" :size="20"></ae-icon></ae-icon-button>
+              <span class="dehnen nur-desktop"></span>
               <ae-button v-if="schrittIndex < phase.bereiche.length - 1" icon="arrow-right" @click="oeffnen(phase.bereiche[schrittIndex + 1].id)">
-                {{ aktiv.optional && !aktiv.erledigt(event) ? 'Überspringen' : 'Weiter' }}: {{ phase.bereiche[schrittIndex + 1].kurz || phase.bereiche[schrittIndex + 1].label }}
+                {{ aktiv.optional && !aktiv.erledigt(event) ? 'Überspringen' : 'Weiter' }}<span class="setup-weiter__ziel">: {{ phase.bereiche[schrittIndex + 1].kurz || phase.bereiche[schrittIndex + 1].label }}</span>
               </ae-button>
-              <ae-button v-else-if="zielNachSetup" icon="arrow-right" @click="oeffnen(zielNachSetup)">Setup abschliessen: zum Programm</ae-button>
+              <ae-button v-else-if="zielNachSetup" icon="arrow-right" @click="oeffnen(zielNachSetup)">Zum Programm</ae-button>
             </div>
           </div>
         </div>
@@ -131,13 +144,7 @@ var SeiteEvent = {
     /* Nur Bereiche, für die die Person mindestens Leserecht hat; Grunddaten sehen alle Mitglieder.
        Zuständige und Halter sehen ihre Aufgaben und ihr Material auch ohne Recht; Feedback schreibt jedes Mitglied. */
     phasen() {
-      var event = this.event
-      var recht = event.ich.recht
-      var sichtbar = function (b) {
-        return b.id === 'uebersicht' || recht[b.recht] >= 1 || (b.id === 'aufgaben' && event.aufgaben.length > 0)
-          || (b.id === 'material' && event.material.length > 0) || (b.id === 'feedback' && event.ich.istMitglied)
-      }
-      return EVENT_PHASEN.map(function (p) { return Object.assign({}, p, { bereiche: p.bereiche.filter(sichtbar) }) }).filter(function (p) { return p.bereiche.length })
+      return sichtbarePhasen(this.event)
     },
     setupPhase() {
       return this.phasen.find(function (p) { return p.id === 'setup' }) || { bereiche: [] }

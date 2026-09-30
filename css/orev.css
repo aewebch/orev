@@ -632,3 +632,144 @@ select.pille--auswahl{appearance:none;padding-right:26px;background-image:url("d
 .einstieg h2{margin:0;color:var(--color-text);font-size:var(--text-h3)}
 .einstieg p{margin:0;max-width:440px;font-size:var(--text-small);line-height:1.6}
 .einstieg .ae-icon{color:var(--color-primary)}
+
+/* Freigabe-Links */
+.freigabe{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--secondary-10)}
+.freigabe:first-child{padding-top:0}
+.freigabe--abgelaufen .freigabe__link input{text-decoration:line-through;color:var(--color-text-muted)}
+.freigabe__kopf{display:flex;align-items:center;gap:8px;min-width:0}
+.freigabe__titel{font-weight:var(--weight-bold);min-width:0}
+.freigabe__link{display:flex;align-items:center;gap:4px;min-width:0}
+.freigabe__link input{min-width:0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--text-caption);text-overflow:ellipsis}
+.freigabe__warnung{display:flex;gap:6px;align-items:flex-start;color:var(--warning-ink)}
+.freigabe__warnung .ae-icon,.freigabe__warnung svg{flex:none;margin-top:2px}
+
+/* Beitreten über einen Link */
+.beitreten__titel{margin:0;overflow-wrap:anywhere}
+.stufen--voll{display:flex;width:100%}
+.stufen--voll .stufe{flex:1;text-align:center}
+
+/* Einführung: Spotlight mit Karte; auf dem Handy als Blatt oben oder unten */
+.tour{position:fixed;inset:0;z-index:200}
+.tour__schleier{position:absolute;inset:0;background:rgba(40,32,28,.55)}
+.tour__schleier--klar{background:transparent}
+.tour__spot{position:fixed;border-radius:16px;box-shadow:0 0 0 9999px rgba(40,32,28,.55),0 0 0 3px var(--color-primary);pointer-events:none;transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease}
+.tour__karte{position:fixed;width:360px;max-width:calc(100vw - 32px);display:flex;flex-direction:column;gap:8px;padding:20px;border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 12px 40px rgba(40,32,28,.28)}
+.tour__karte--mitte{left:50%;top:50%;transform:translate(-50%,-50%)}
+.tour__zaehler{margin:0;font-size:var(--text-caption);color:var(--color-text-muted);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:.06em}
+.tour__titel{margin:0;font-size:var(--text-h3)}
+.tour__text{margin:0}
+.tour__punkte{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.tour__punkt{width:6px;height:6px;border-radius:50%;background:var(--secondary-20)}
+.tour__punkt--fertig{background:var(--color-primary);opacity:.45}
+.tour__punkt--aktiv{background:var(--color-primary);width:16px;border-radius:3px}
+.tour__knoepfe{display:flex;align-items:center;gap:8px;margin-top:4px}
+@media (max-width:699px){
+  .tour__karte{left:16px;right:16px;width:auto;max-width:none}
+  .tour__karte--unten,.tour__karte--mitte{top:auto;bottom:16px;transform:none;left:16px}
+  .tour__karte--oben{top:16px}
+}
+@media print{.tour{display:none}}
+
+/* Responsiveness: Pillen und Auswahlfelder nie breiter als ihr Platz, Setup-Knöpfe kurz */
+.pille{max-width:min(18rem,100%);min-width:0}
+select.pille{overflow:hidden}
+.setup-weiter .ae-btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:699px){
+  .setup-weiter__ziel{display:none}
+  .setup-weiter__zurueck{flex:none}
+}
+@media (max-width:420px){
+  .ae-card__head{flex-wrap:wrap;gap:8px}
+  .ae-card__head>:first-child{min-width:0;flex:1 1 12rem}
+  .wm__aktionen>.ae-btn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+@media (max-width:480px){
+  /* Zeilen mit Badges: Badges unter den Namen statt daneben */
+  .ae-row{flex-wrap:wrap;gap:8px 12px}
+  .ae-row__main{flex:1 1 calc(100% - 64px)}
+  .ae-row>.reihe:last-child,.ae-row>:last-child:not(.ae-row__main):not(.ae-avatar){margin-left:52px;flex-wrap:wrap}
+  .ae-row__meta{overflow-wrap:anywhere}
+}
+@media (max-width:380px){
+  /* Phasen: nur die aktive mit Text, die anderen als Icon */
+  .event-phasen .ae-tab:not(.ae-tab--active){flex:0 0 auto;padding:10px 14px}
+  .event-phasen .ae-tab:not(.ae-tab--active) .event-phasen__text{display:none}
+  .event-phasen .ae-tab:not(.ae-tab--active) .event-phasen__icon{display:inline-flex}
+  .event-phasen .ae-tab--active{flex:1 1 auto}
+  .leiste{padding:0 6px}
+  .leiste__eintrag,.leiste__icon{width:40px;height:40px}
+  .leiste__mitte,.leiste__unten{gap:0}
+}
+
+/* Auswertungsbericht: A4-Seiten (210 x 297 mm) mit Kopf- und Fusszeile; der Inhalt ist 170 x 243 mm gross.
+   Die Masse gelten am Bildschirm wie im Druck (css/druck-bericht.css), damit der Umbruch übereinstimmt. */
+.bericht{display:flex;flex-direction:column;gap:12px}
+.bericht-leiste{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bericht-hinweis{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--radius-lg);background:var(--secondary-5);font-size:var(--text-small)}
+.bericht-hinweis svg,.bericht-hinweis .ae-icon{flex:none;margin-top:1px}
+.bericht-legende{display:flex;gap:8px;flex-wrap:wrap;margin:0;font-size:var(--text-small)}
+.bericht-messen{position:absolute;left:-10000px;top:0;width:170mm;visibility:hidden;pointer-events:none}
+.bericht-rahmen{width:100%;overflow:hidden}
+.bericht-skala{position:relative}
+.bericht-skala__innen{display:flex;flex-direction:column;align-items:center;gap:24px;transform-origin:top left;width:max-content;margin:0 auto}
+.bericht-seite,.bericht-messen{font-family:var(--font-sans);font-size:10.5pt;font-weight:400;line-height:1.55;color:#2B2226}
+.bericht-seite{position:relative;flex:none;width:210mm;height:297mm;padding:18mm 20mm 16mm;display:flex;flex-direction:column;background:#fffdfb;box-shadow:0 2px 14px rgba(40,32,28,.14);border-radius:4px;overflow:hidden}
+.bericht-seite__kopf,.bericht-seite__fuss{flex:none;height:10mm;display:flex;justify-content:space-between;align-items:flex-start;font-size:8pt;color:#7a6d70;letter-spacing:.02em}
+.bericht-seite__kopf{border-bottom:.3mm solid #e4d9d2;margin-bottom:0}
+.bericht-seite__fuss{align-items:flex-end;justify-content:flex-end}
+.bericht-seite__inhalt{height:243mm;overflow:hidden;padding-top:4mm}
+.bericht-messen .bericht-seite__inhalt{padding-top:0;height:243mm}
+.b-block{padding-bottom:3.2mm}
+.b-block--h1{padding-top:2mm;padding-bottom:4mm}
+.b-block--h2{padding-top:3mm;padding-bottom:1.5mm}
+.b-h1,.b-h2{margin:0;color:#8a3f3f;line-height:1.25;font-weight:800}
+.b-h1{font-size:17pt}
+.b-h2{font-size:12pt;color:#4E2D3A}
+.b-nr{display:inline-block;min-width:9mm;color:#a14d4d}
+.b-block--h2 .b-nr{min-width:11mm}
+.b-p,.b-zitat,.b-liste,.b-quellen{margin:0;hyphens:auto;text-align:justify}
+.b-argument{padding-left:3.5mm;border-left:.8mm solid #ead9d3}
+.b-fn{font-size:.68em;line-height:0;margin-left:.3mm;color:#a14d4d;font-weight:700}
+.b-zitat{margin:0 6mm;padding:1mm 0 1mm 4mm;border-left:.8mm solid #a14d4d;font-style:italic;color:#4a3d41}
+.b-liste,.b-quellen{padding-left:6mm}
+.b-liste li,.b-quellen li{margin-bottom:1.5mm}
+.b-quellen{font-size:9pt;text-align:left}
+.b-tabelle{width:100%;border-collapse:collapse;font-size:9pt}
+.b-tabelle th{text-align:left;font-weight:700;border-bottom:.4mm solid #a14d4d;padding:1.2mm 2mm}
+.b-tabelle td{border-bottom:.2mm solid #e4d9d2;padding:1.2mm 2mm;vertical-align:top}
+.bericht--dreischritt .b-satz--these{background:#f6e3df;box-shadow:0 0 0 1px #f6e3df;border-radius:2px}
+.bericht--dreischritt .b-satz--begruendung{text-decoration:underline;text-decoration-color:#3F8A4A;text-decoration-thickness:2px;text-underline-offset:3px}
+.bericht--dreischritt .b-satz--beleg{background:#e6eef7;box-shadow:0 0 0 1px #e6eef7;border-radius:2px}
+.bericht-legende .b-satz{padding:2px 8px;border-radius:var(--radius-pill)}
+/* Titelblatt */
+.bericht-seite--titel{padding:0 20mm 20mm;justify-content:flex-end}
+.bericht-titel__band{position:absolute;left:0;right:0;top:0;height:95mm;background:linear-gradient(150deg,#4E2D3A 55%,#a14d4d 100%)}
+.bericht-titel__kicker{margin:0;color:#a14d4d;font-size:10pt;font-weight:800;text-transform:uppercase;letter-spacing:.14em}
+.bericht-titel__titel{margin:3mm 0 0;font-size:30pt;line-height:1.1;font-weight:800;color:#2B2226;overflow-wrap:anywhere}
+.bericht-titel__thema{margin:4mm 0 0;font-size:13pt;color:#6b5d61}
+.bericht-titel__angaben{display:grid;grid-template-columns:34mm 1fr;gap:2mm 6mm;margin:14mm 0 0;padding-top:6mm;border-top:.4mm solid #e4d9d2;font-size:10pt}
+.bericht-titel__angaben dt{color:#7a6d70}
+.bericht-titel__angaben dd{margin:0;font-weight:700}
+.bericht-titel__fuss{margin:16mm 0 0;font-size:8pt;color:#7a6d70}
+/* Inhaltsverzeichnis */
+.bericht-toc__titel{margin-bottom:6mm}
+.bericht-toc{list-style:none;margin:0;padding:0}
+.bericht-toc__eintrag{display:flex;align-items:baseline;gap:2mm;padding:1.3mm 0}
+.bericht-toc__eintrag--h1{font-weight:800;margin-top:2mm}
+.bericht-toc__eintrag--h2{padding-left:9mm;font-size:9.5pt}
+.bericht-toc__nr{min-width:10mm;color:#a14d4d}
+.bericht-toc__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:125mm}
+.bericht-toc__punkte{flex:1;border-bottom:.3mm dotted #b9aca6;transform:translateY(-1mm)}
+.bericht-toc__seite{min-width:6mm;text-align:right}
+/* Leseansicht */
+.bericht-lesen{max-width:44rem;margin:0 auto;padding:8px 0 24px;font-size:var(--text-body);line-height:1.65}
+.bericht-lesen__titel{margin:4px 0 12px;overflow-wrap:anywhere}
+.bericht-lesen__inhalt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px 16px;margin-bottom:16px;border-radius:var(--radius-lg);background:var(--secondary-5)}
+.bericht-lesen .b-p,.bericht-lesen .b-zitat,.bericht-lesen .b-liste{text-align:left}
+.bericht-lesen .b-block{padding-bottom:14px}
+.bericht-lesen .b-block--h1{padding-top:18px}
+.bericht-lesen .b-h1{font-size:var(--text-h3)}
+.bericht-lesen .b-h2{font-size:1.05rem}
+.bericht-lesen .b-tabelle{display:block;overflow-x:auto;font-size:var(--text-small)}
+.bericht-lesen .b-zitat{margin:0 0 0 8px}

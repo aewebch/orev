@@ -257,6 +257,48 @@ wirkungsVerbindungSetzen($modell, $l[1]['id'], $outcomes[2]['id'], true);
 wirkungsVerbindungSetzen($modell, $outcomes[0]['id'], $i[0]['id'], true);
 wirkungsVerbindungSetzen($modell, $outcomes[1]['id'], $i[1]['id'], true);
 wirkungsVerbindungSetzen($modell, $outcomes[2]['id'], $i[0]['id'], true);
+/* Nachbereitung (fiktiv): Zielüberprüfung, Bewertungen, Status der Outcomes, Teamkultur und Fünf-Finger-Rückmeldungen,
+   damit der Auswertungsbericht etwas zeigt */
+$pruefungen = array(
+  array('Schlussrunde am letzten Kleingruppenabend', 'Etwa drei Viertel nannten eine Szene, am häufigsten den Gang auf dem Wasser.', 'erreicht', 'Die Storytime am Morgen hat sich als roter Faden bewährt.'),
+  array('Kurze Umfrage am Mittwoch in den Kleingruppen', 'Zwei Jugendliche hatten noch keine Ansprechperson; sie wurden danach gezielt begleitet.', 'teilweise', 'Kleingruppen früher bilden, schon am Anreisetag.'),
+  array('Rapport des Sanitätsteams und Tagesverantwortung', 'Keine ernsthaften Verletzungen; der Ausflug nach Siena musste wegen Hitze gekürzt werden.', 'erreicht', ''),
+);
+foreach ($pruefungen as $k => $p) {
+  $camp['konzept']['ziele'][$k]['pruefung'] = array('wie' => $p[0], 'ergebnis' => $p[1], 'grad' => $p[2], 'kommentar' => $p[3]);
+}
+$bewertung = function ($wert, $notiz) { return array('bewertung' => $wert, 'notiz' => $notiz); };
+$camp['reflexion'] = array(
+  'teamkultur' => 'Das Team hat sich gegenseitig getragen, auch als es am Mittwoch wegen der Hitze eng wurde. Absprachen am Morgen waren kurz und klar; am Abend fehlte manchmal die Zeit für eine gemeinsame Auswertung.',
+  'ort' => $bewertung('gut', 'Bungalows direkt am Strand, kurze Wege; die Küche war für 50 Personen knapp.'),
+  'tage' => array(),
+  'punkte' => array(),
+);
+$tagWerte = array(array('gut', 'Anreise ohne Verspätung, gute Stimmung am ersten Abend.'), array('gut', ''), array('mittel', 'Mister X zu lang, Gruppen kamen erschöpft zurück.'), array('schwach', 'Hitze, Ausflug nach Siena gekürzt.'), array('gut', 'SportsDay mit viel Begeisterung.'));
+foreach ($tagWerte as $k => $w) {
+  if (isset($camp['tage'][$k])) $camp['reflexion']['tage'][$camp['tage'][$k]['datum']] = $bewertung($w[0], $w[1]);
+}
+$punktWerte = array(array('gut', 'Die Jugendlichen haben aktiv mitgedacht.'), array('gut', ''), array('mittel', ''), array('schwach', 'Zu lange Wartezeiten zwischen den Posten.'), array('gut', 'Stimmung wie selten, auch die Ruhigen waren dabei.'));
+foreach ($punktWerte as $k => $w) {
+  $index = $k * 3;
+  if (isset($camp['programmpunkte'][$index])) $camp['reflexion']['punkte'][$camp['programmpunkte'][$index]['id']] = $bewertung($w[0], $w[1]);
+}
+$status = array('erreicht', 'teilweise', 'erreicht');
+$n = 0;
+foreach ($modell['eintraege'] as $k => $e) {
+  if ($e['spalte'] === 'outcomes') $modell['eintraege'][$k]['status'] = $status[$n++ % 3];
+  if ($e['spalte'] === 'outcomes' && $modell['eintraege'][$k]['indikator'] === '') $modell['eintraege'][$k]['indikator'] = 'Aussagen in der Schlussrunde';
+}
+$rueckmeldung = function ($von, $tage, $finger) {
+  return array('id' => uuid(), 'von' => $von, 'an' => '', 'text' => '', 'finger' => $finger,
+    'erstellt_am' => date('Y-m-d\TH:i:s', strtotime('2026-10-12 18:00') + $tage * 3600), 'geaendert_am' => '');
+};
+$camp['feedbacks'] = array(
+  $rueckmeldung($id['hannes'], 1, array('daumen' => 'Die Stimmung im Team und die Kleingruppen am Abend.', 'zeigefinger' => 'Kleingruppen früh bilden.', 'mittelfinger' => 'Mister X war zu lang, die Wartezeiten zwischen den Posten auch.', 'ringfinger' => 'Wie offen die Jugendlichen in der Kleingruppe von sich erzählt haben.', 'kleinerfinger' => 'Zeit für das Team am Abend.')),
+  $rueckmeldung($id['jana'], 2, array('daumen' => 'Der Worship und die Kleingruppen haben mich begeistert.', 'zeigefinger' => 'Genug Wasser und Schatten bei Ausflügen einplanen.', 'mittelfinger' => 'Siena bei dieser Hitze nicht am Nachmittag.', 'ringfinger' => '', 'kleinerfinger' => 'Ruhezeiten am Mittag.')),
+  $rueckmeldung($id['dario'], 3, array('daumen' => 'Worship am Strand, einmalig.', 'zeigefinger' => '', 'mittelfinger' => 'Die Küche braucht mehr Platz oder eine zweite Schicht.', 'ringfinger' => 'Das Abschlussfeuer.', 'kleinerfinger' => '')),
+  $rueckmeldung($id['fabienne'], 4, array('daumen' => 'Die Storytime am Morgen und die Stimmung in der Gruppe.', 'zeigefinger' => 'Tagesverantwortung mit klarer Übergabe.', 'mittelfinger' => '', 'ringfinger' => '', 'kleinerfinger' => 'Zeit für persönliche Gespräche mit den Jugendlichen.')),
+);
 $camp['wirkungsmodell'] = $modell;
 speicherSchreiben('events/' . $camp['id'], $camp);
 

@@ -23,6 +23,7 @@ require __DIR__ . '/src/benachrichtigungen.php';
 require __DIR__ . '/src/konzept.php';
 require __DIR__ . '/src/wirkungsmodell.php';
 require __DIR__ . '/src/ical.php';
+require __DIR__ . '/src/freigaben.php';
 require __DIR__ . '/src/aktionen/konto.php';
 require __DIR__ . '/src/aktionen/verwaltung.php';
 require __DIR__ . '/src/aktionen/events.php';
@@ -34,6 +35,7 @@ require __DIR__ . '/src/aktionen/suche.php';
 require __DIR__ . '/src/aktionen/konzept.php';
 require __DIR__ . '/src/aktionen/wirkungsmodell.php';
 require __DIR__ . '/src/aktionen/ical.php';
+require __DIR__ . '/src/aktionen/freigaben.php';
 
 apiHeader();
 anfrageHerkunftPruefen();
@@ -58,6 +60,13 @@ try {
     'einladung_pruefen' => 'aktionEinladungPruefen',
     'einladung_einloesen' => 'aktionEinladungEinloesen',
     'passwort_aendern' => 'aktionPasswortAendern',
+    'einfuehrung_speichern' => 'aktionEinfuehrungSpeichern',
+    'freigabe_pruefen' => 'aktionFreigabePruefen',
+    'freigabe_einloesen' => 'aktionFreigabeEinloesen',
+    'freigabe_konto_anlegen' => 'aktionFreigabeKontoAnlegen',
+    'freigabe_speichern' => 'aktionFreigabeSpeichern',
+    'freigabe_erneuern' => 'aktionFreigabeErneuern',
+    'freigabe_loeschen' => 'aktionFreigabeLoeschen',
     'benutzer_liste' => 'aktionBenutzerListe',
     'person_speichern' => 'aktionPersonSpeichern',
     'einladen' => 'aktionEinladen',

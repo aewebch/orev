@@ -24,17 +24,17 @@ app.component('app-leiste', {
   template: `
     <nav class="leiste" aria-label="Hauptnavigation">
       <router-link to="/" class="leiste__logo" :aria-label="zustand.name + ', Übersicht'">O</router-link>
-      <leiste-eintrag v-if="zustand.darfEventsAnlegen" class="leiste__neu" icon="plus" label="Neues Event" @click="gehe({ path: '/', query: { neu: '1' } })"></leiste-eintrag>
+      <leiste-eintrag v-if="zustand.darfEventsAnlegen" class="leiste__neu" data-tour="neu" icon="plus" label="Neues Event" @click="gehe({ path: '/', query: { neu: '1' } })"></leiste-eintrag>
       <div class="leiste__mitte">
         <leiste-eintrag icon="layout-dashboard" label="Übersicht" :aktiv="$route.path === '/'" @click="gehe('/')"></leiste-eintrag>
-        <leiste-eintrag icon="list-todo" label="Meine Aufgaben" :aktiv="$route.path === '/aufgaben'" @click="gehe('/aufgaben')"></leiste-eintrag>
+        <leiste-eintrag icon="list-todo" label="Meine Aufgaben" data-tour="aufgaben" :aktiv="$route.path === '/aufgaben'" @click="gehe('/aufgaben')"></leiste-eintrag>
         <leiste-eintrag icon="bell" label="Mitteilungen" :aktiv="$route.path === '/mitteilungen'" :zaehler="zustand.ungelesen" class="nur-mobil" @click="gehe('/mitteilungen')"></leiste-eintrag>
         <leiste-eintrag v-if="zustand.ich.istAdmin" icon="settings" label="Einstellungen" :aktiv="$route.path === '/einstellungen'" :zaehler="zustand.updateVerfuegbar ? 1 : 0" class="nur-desktop" @click="gehe('/einstellungen')"></leiste-eintrag>
       </div>
       <div class="leiste__unten">
         <leiste-eintrag icon="circle-help" label="Hilfe" :aktiv="$route.path === '/hilfe'" class="nur-desktop" @click="gehe('/hilfe')"></leiste-eintrag>
-        <leiste-eintrag icon="search" label="Suchen" :aktiv="panel === 'suche'" @click="umschalten('suche')"></leiste-eintrag>
-        <leiste-eintrag icon="user" label="Mitteilungen und Konto" :aktiv="panel === 'konto'" :zaehler="zustand.ungelesen" class="leiste__konto" @click="umschalten('konto')">
+        <leiste-eintrag icon="search" label="Suchen" data-tour="suche" :aktiv="panel === 'suche'" @click="umschalten('suche')"></leiste-eintrag>
+        <leiste-eintrag icon="user" label="Mitteilungen und Konto" :aktiv="panel === 'konto'" :zaehler="zustand.ungelesen" class="leiste__konto" data-tour="konto" @click="umschalten('konto')">
           <span class="leiste__avatar">{{ initialen }}</span>
         </leiste-eintrag>
       </div>
@@ -83,6 +83,7 @@ app.component('app-leiste', {
       <div class="knopf-raster">
         <button type="button" class="knopf-kachel" @click="gehe('/konto')"><ae-icon name="user" :size="16"></ae-icon>Mein Konto</button>
         <button type="button" class="knopf-kachel" @click="gehe('/hilfe')"><ae-icon name="circle-help" :size="16"></ae-icon>Hilfe</button>
+        <button type="button" class="knopf-kachel" @click="einfuehrung"><ae-icon name="compass" :size="16"></ae-icon>Einführung</button>
         <button type="button" class="knopf-kachel knopf-kachel--gefahr" @click="abmelden"><ae-icon name="log-out" :size="16"></ae-icon>Abmelden</button>
       </div>
       <p class="fusszeile"><button type="button" class="text-link" @click="gehe('/datenschutz')">Datenschutz</button> · <a href="LICENSE" target="_blank" rel="noopener" class="text-link">Lizenz</a> · Orev {{ zustand.version }}</p>
@@ -169,6 +170,10 @@ app.component('app-leiste', {
     },
     trefferIcon(art) {
       return { event: 'calendar', programm: 'calendar-days', ablauf: 'list-ordered', aufgabe: 'list-todo', material: 'package', ziel: 'target', person: 'user' }[art] || 'info'
+    },
+    einfuehrung() {
+      this.panel = null
+      einfuehrungStarten()
     },
     async abmelden() {
       await api.anfrage('abmelden', {}).catch(function () {})

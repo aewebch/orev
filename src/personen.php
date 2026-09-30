@@ -80,6 +80,7 @@ function personOeffentlich($person) {
     'darfEventsAnlegen' => $person['konto'] !== null && !empty($person['konto']['darf_events_anlegen']),
     'letzteAnmeldung' => $person['konto'] !== null ? $person['konto']['letzte_anmeldung'] : '',
     'eingeladenBis' => $person['einladung'] !== null ? $person['einladung']['gueltig_bis'] : '',
+    'einfuehrungGesehen' => $person['konto'] !== null && !empty($person['konto']['einfuehrung_gesehen']),
   );
 }
 

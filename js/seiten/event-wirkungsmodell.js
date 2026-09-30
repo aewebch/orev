@@ -45,7 +45,7 @@ app.component('event-wirkungsmodell', {
           </div>
         </div>
         <div class="reihe nicht-drucken wm__aktionen">
-          <ae-button v-if="darf && !vorschau" variant="secondary" icon="sparkles" @click="uebernehmen">Aus dem Event übernehmen</ae-button>
+          <ae-button v-if="darf && !vorschau" variant="secondary" icon="sparkles" title="Aus dem Event übernehmen" @click="uebernehmen"><span class="nur-desktop">Aus dem Event übernehmen</span><span class="nur-mobil">Übernehmen</span></ae-button>
           <ae-button v-if="vorschau" variant="tertiary" icon="x" @click="vorschau = false">Vorschau schliessen</ae-button>
           <hilfe-punkt thema="wirkungsmodell"></hilfe-punkt>
           <pillen-menue label="Weitere Aktionen" rechts>

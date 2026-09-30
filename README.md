@@ -3,7 +3,8 @@
 Orev ist ein Werkzeug für Leitungsteams, die Events (ein- oder mehrtägig) und Camps planen, durchführen und auswerten:
 Konzept mit SMART-Zielen und Zielgruppe, Teams und Rollen mit fein abgestuften Rechten, Programm in Wochen-, Tages- und
 Listenansicht, Ablaufpläne pro Programmpunkt, Aufgaben mit Vorbereitungsterminen, eine zusammengeführte Materialliste,
-Reflexion mit Wirkungsmodell und Fünf-Finger-Feedback, Benachrichtigungen und ein persönliches Kalender-Abo.
+Reflexion mit Wirkungsmodell und Fünf-Finger-Feedback, ein automatisch geschriebener Auswertungsbericht, Freigabe-Links
+zum Einladen, eine Einführungstour, Benachrichtigungen und ein persönliches Kalender-Abo.
 
 ## Stand
 
@@ -32,6 +33,21 @@ Orev braucht nur ein PHP-Hosting (PHP 7.2 oder neuer mit `openssl` und `mbstring
 - Unter Apache sperrt `.htaccess` alle internen Ordner. **Unter nginx** bitte `src/`, `migrationen/`, `tests/`, `docs/`,
   `werkzeuge/` und den Datenordner selbst sperren (`location ~ ^/(src|migrationen|tests|docs|werkzeuge|daten)/ { deny all; }`).
 - Orev nur über HTTPS betreiben.
+
+## Freigabe-Links
+
+Die Event-Leitung erstellt im Setup-Schritt «Personen» Links mit Rollen, Teams und Ablaufdatum (Standard: unbegrenzt).
+Wer einen Link öffnet, eröffnet ein Konto mit diesen Rechten, meldet sich mit einem bestehenden Konto an oder wird, wenn
+bereits angemeldet, sofort verknüpft. Links lassen sich erneuern (der alte wird ungültig) und löschen. Eine bereits
+erfasste E-Mail-Adresse wird über einen Link nie übernommen; dafür braucht es eine Einladung.
+
+## Auswertungsbericht
+
+In der Nachbereitung schreibt Orev aus Zielüberprüfung, Bewertungen, Wirkungsmodell, Teamkultur und Feedback einen
+Fliesstext-Bericht: Titelblatt, Inhaltsverzeichnis mit Seitenzahlen, A4-Seiten mit Kopf- und Fusszeile, nummerierte
+Quellenangaben und Quellenverzeichnis. Zentrale Aussagen folgen dem argumentativen Dreischritt (Behauptung, Begründung,
+Beleg). Rückmeldungen erscheinen anonymisiert und nur für Personen mit Feedback-Recht. Drucken oder als PDF sichern
+über den Browser.
 
 ## Kalender-Abo
 
