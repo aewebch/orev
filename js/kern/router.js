@@ -5,6 +5,7 @@ var router = VueRouter.createRouter({
     { path: '/einrichtung', component: SeiteEinrichtung, meta: { oeffentlich: true } },
     { path: '/anmelden', component: SeiteAnmelden, meta: { oeffentlich: true } },
     { path: '/einladung/:token', component: SeiteEinladung, props: true, meta: { oeffentlich: true } },
+    { path: '/datenschutz', component: SeiteDatenschutz, meta: { oeffentlich: true } },
     { path: '/', component: SeiteDashboard },
     { path: '/konto', component: SeiteKonto },
     { path: '/mitteilungen', component: SeiteMitteilungen },

@@ -119,6 +119,11 @@ function aktionEinstellungenLesen() {
   antwort(array('einstellungen' => einstellungenOeffentlich(einstellungenLesen())));
 }
 
+/* Datenschutzerklärung: öffentlich, auch ohne Anmeldung */
+function aktionDatenschutz() {
+  antwort(array('datenschutz' => datenschutzAngaben(einstellungenLesen())));
+}
+
 function aktionEinstellungenSpeichern() {
   nurPost();
   pflichtAdmin();
@@ -128,19 +133,16 @@ function aktionEinstellungenSpeichern() {
     'ical_ganzes_programm' => feld('icalGanzesProgramm') === true,
     'mail_aktiv' => feld('mailAktiv') === true,
     'mail_absender' => (string) feld('mailAbsender'),
-    'github_repo' => (string) feld('githubRepo'),
+    'betreiber' => (string) feld('betreiber'),
+    'datenschutz_kontakt' => (string) feld('datenschutzKontakt'),
+    'datenschutz_zusatz' => (string) feld('datenschutzZusatz'),
   );
   if ($werte['name'] === '' || mb_strlen($werte['name']) > 80) fehler('Bitte geben Sie einen Namen für die Installation an.');
   if (!in_array($werte['zeitzone'], timezone_identifiers_list(), true)) fehler('Unbekannte Zeitzone.');
   if ($werte['mail_aktiv'] && !gueltigeEmail($werte['mail_absender'])) fehler('Bitte geben Sie eine gültige Absender-Adresse an.');
-  if (!preg_match('/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/', $werte['github_repo'])) fehler('Das Repository hat die Form «benutzer/repository».');
-  $token = feld('githubToken', null);
-  if ($token !== null) {
-    if ($token !== '' && !preg_match('/^[A-Za-z0-9_]{20,255}$/', $token)) fehler('Der GitHub-Token hat ein unerwartetes Format.');
-    $werte['github_token'] = $token;
-  }
+  if (mb_strlen($werte['betreiber']) > 1000 || mb_strlen($werte['datenschutz_zusatz']) > 20000) fehler('Eine Angabe zum Datenschutz ist zu lang.');
+  if ($werte['datenschutz_kontakt'] !== '' && !gueltigeEmail($werte['datenschutz_kontakt'])) fehler('Bitte geben Sie eine gültige E-Mail-Adresse für Datenschutzanfragen an.');
   $einstellungen = einstellungenAendern(function (&$daten) use ($werte) {
-    if ($daten['github_repo'] !== $werte['github_repo'] || isset($werte['github_token'])) $daten['update_stand'] = null;
     $daten = array_merge($daten, $werte);
     return $daten;
   });

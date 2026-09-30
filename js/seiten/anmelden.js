@@ -12,6 +12,7 @@ var SeiteAnmelden = {
         <ae-button type="submit" block :disabled="laeuft">Anmelden</ae-button>
         <p class="leise">Noch kein Konto oder Passwort vergessen? Bitten Sie eine Person mit Admin-Rechten um eine Einladung.</p>
       </form>
+      <p class="fusszeile"><router-link to="/datenschutz">Datenschutz</router-link> · <a href="LICENSE" target="_blank" rel="noopener">Lizenz</a></p>
     </main>
   `,
   data() {

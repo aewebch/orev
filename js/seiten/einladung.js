@@ -18,6 +18,7 @@ var SeiteEinladung = {
         <ae-alert v-if="fehler" tone="danger">{{ fehler }}</ae-alert>
         <ae-button type="submit" block :disabled="laeuft">{{ einladung.hatKonto ? 'Passwort speichern' : 'Konto anlegen' }}</ae-button>
       </form>
+      <p class="fusszeile"><router-link to="/datenschutz">Datenschutz</router-link></p>
     </main>
   `,
   data() {

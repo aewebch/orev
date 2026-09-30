@@ -83,6 +83,7 @@ app.component('app-leiste', {
         <button type="button" class="knopf-kachel" @click="gehe('/konto')"><ae-icon name="user" :size="16"></ae-icon>Mein Konto</button>
         <button type="button" class="knopf-kachel knopf-kachel--gefahr" @click="abmelden"><ae-icon name="log-out" :size="16"></ae-icon>Abmelden</button>
       </div>
+      <p class="fusszeile"><button type="button" class="text-link" @click="gehe('/datenschutz')">Datenschutz</button> · <a href="LICENSE" target="_blank" rel="noopener" class="text-link">Lizenz</a> · Orev {{ zustand.version }}</p>
     </aside>
   `,
   data() {

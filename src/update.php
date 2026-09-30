@@ -1,14 +1,15 @@
 <?php
 /* Update-Prüfung und Installation über GitHub-Releases (Mechanismus aus ormeet).
-   Es werden keine Nutzerdaten übermittelt: nur die Anfrage nach dem neuesten Release, bei privatem Repository mit Token.
+   Es werden keine Nutzerdaten übermittelt, nur die Anfrage nach dem neuesten Release des öffentlichen Repositorys.
+   Das Repository ist fest: Orev wird öffentlich verteilt, Installationen holen Updates immer aus derselben Quelle.
    Das Ergebnis der Prüfung wird 6 Stunden gemerkt; ein Fehler bei GitHub beeinträchtigt die App nie. */
 
 define('OREV_UPDATE_CACHE', 6 * 3600);
+define('OREV_UPDATE_REPO', 'aewebch/orev');
 
 /* Liefert array(Status, Inhalt); Status 0 bei Verbindungsfehler */
-function holen($url, $token) {
+function holen($url) {
   $header = array('User-Agent: Orev', 'Accept: application/vnd.github+json');
-  if ($token !== '') $header[] = 'Authorization: Bearer ' . $token;
   if (function_exists('curl_init')) {
     $ch = curl_init($url);
     curl_setopt_array($ch, array(
@@ -43,9 +44,9 @@ function holen($url, $token) {
 }
 
 function neuestesRelease($einstellungen) {
-  list($status, $inhalt) = holen('https://api.github.com/repos/' . $einstellungen['github_repo'] . '/releases/latest', $einstellungen['github_token']);
+  list($status, $inhalt) = holen('https://api.github.com/repos/' . OREV_UPDATE_REPO . '/releases/latest');
   if ($status === 0) throw new RuntimeException('GitHub ist nicht erreichbar.');
-  if ($status === 404) throw new RuntimeException('Kein Release gefunden. Bei einem privaten Repository braucht es einen GitHub-Token.');
+  if ($status === 404) throw new RuntimeException('Kein Release gefunden.');
   if ($status !== 200) throw new RuntimeException("GitHub antwortet mit Status $status.");
   $release = json_decode($inhalt, true);
   $version = isset($release['tag_name']) ? ltrim($release['tag_name'], 'v') : '';
@@ -95,7 +96,7 @@ function updateInstallieren() {
   $release = neuestesRelease($einstellungen);
   if (!version_compare($release['version'], lokaleVersion(), '>')) throw new RuntimeException('Es ist bereits die aktuelle Version installiert.');
 
-  list($status, $inhalt) = holen('https://api.github.com/repos/' . $einstellungen['github_repo'] . '/zipball/' . rawurlencode($release['tag']), $einstellungen['github_token']);
+  list($status, $inhalt) = holen('https://api.github.com/repos/' . OREV_UPDATE_REPO . '/zipball/' . rawurlencode($release['tag']));
   if ($status !== 200 || substr($inhalt, 0, 2) !== 'PK') throw new RuntimeException('Das Update-Paket konnte nicht geladen werden.');
   $zipDatei = konfiguration('daten_pfad') . '/update-' . bin2hex(random_bytes(6)) . '.zip';
   file_put_contents($zipDatei, $inhalt);

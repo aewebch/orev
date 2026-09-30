@@ -38,6 +38,7 @@ $skripte = array(
   'js/seiten/event-konzept.js',
   'js/seiten/event-wirkungsmodell.js',
   'js/seiten/mitteilungen.js',
+  'js/seiten/datenschutz.js',
   'js/seiten/konto.js',
   'js/seiten/einstellungen.js',
   'js/kern/router.js',

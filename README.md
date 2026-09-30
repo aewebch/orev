@@ -61,8 +61,16 @@ Konfirmation» mit dem Start-Tag an (erfundene Personen). Mit `--neu` auch dann,
 ## Updates
 
 In den Einstellungen unter «Version und Updates» prüft Orev, ob auf GitHub ein neueres Release vorliegt, und installiert
-es per Klick. Datenordner und `orev-konfiguration.php` bleiben unberührt; nötige Datenanpassungen (Migrationen) laufen
-danach automatisch. Bei einem privaten Repository braucht es einen GitHub-Token mit reinem Lesezugriff.
+es per Klick. Updates kommen immer aus dem offiziellen Repository [aewebch/orev](https://github.com/aewebch/orev).
+Datenordner und `orev-konfiguration.php` bleiben unberührt; nötige Datenanpassungen (Migrationen) laufen danach
+automatisch.
+
+## Datenschutz
+
+Orev bringt eine Datenschutzerklärung mit (`/datenschutz`, ohne Anmeldung erreichbar), die beschreibt, was die Software
+technisch tut. Verantwortlich ist, wer eine Installation betreibt: In den Einstellungen unter «Datenschutz» die
+verantwortliche Stelle, eine Kontaktadresse und bei Bedarf ergänzende Angaben (z. B. Hosting und Serverstandort)
+eintragen und den Text für die eigene Organisation prüfen.
 
 ## Entwicklung
 
@@ -74,3 +82,10 @@ danach automatisch. Bei einem privaten Repository braucht es einen GitHub-Token 
 ## Versionen
 
 Die installierte Version steht in `VERSION`. Releases werden auf GitHub mit Tags ohne «v» veröffentlicht (z. B. `0.1.0`).
+
+## Lizenz
+
+MIT – siehe [LICENSE](LICENSE). Ein Projekt von [Orki](https://orki.ch).
+
+Enthaltene Fremdkomponenten: Vue und Vue Router (MIT), Lucide-Icons (ISC), Schrift Manrope (SIL Open Font License 1.1),
+aeweb Design System.

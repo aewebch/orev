@@ -494,3 +494,10 @@ select.pille--auswahl{appearance:none;padding-right:26px;background-image:url("d
 .abo-link{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-lg);background:var(--color-page-bg);color:var(--color-text-muted)}
 .abo-link input{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--text-small);color:var(--color-text)}
 .abo-knopf{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+
+/* Datenschutz und Fusszeile */
+.fusszeile{margin:0;text-align:center;font-size:var(--text-small);color:var(--color-text-muted)}
+.fusszeile a,.fusszeile .text-link{font-size:inherit}
+.datenschutz__text h2{margin:0 0 8px;font-size:var(--text-label)}
+.datenschutz__text p,.datenschutz__text ul{margin:0 0 8px;font-size:var(--text-small);line-height:1.6}
+.datenschutz__text ul{padding-left:20px}

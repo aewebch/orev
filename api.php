@@ -65,6 +65,7 @@ try {
     'konto_rechte' => 'aktionKontoRechte',
     'konto_entfernen' => 'aktionKontoEntfernen',
     'einstellungen_lesen' => 'aktionEinstellungenLesen',
+    'datenschutz' => 'aktionDatenschutz',
     'einstellungen_speichern' => 'aktionEinstellungenSpeichern',
     'update_pruefen' => 'aktionUpdatePruefen',
     'update_installieren' => 'aktionUpdateInstallieren',

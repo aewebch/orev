@@ -9,9 +9,10 @@ function einstellungenStandard() {
     'ical_ganzes_programm' => false,
     'mail_aktiv' => false,
     'mail_absender' => '',
-    'github_repo' => 'aewebch/orev',
-    'github_token' => '',
     'update_stand' => null,
+    'betreiber' => '',
+    'datenschutz_kontakt' => '',
+    'datenschutz_zusatz' => '',
     'rollenvorlagen' => rollenvorlagenStandard(),
   );
 }
@@ -67,8 +68,21 @@ function einstellungenOeffentlich($einstellungen) {
     'icalGanzesProgramm' => $einstellungen['ical_ganzes_programm'],
     'mailAktiv' => $einstellungen['mail_aktiv'],
     'mailAbsender' => $einstellungen['mail_absender'],
-    'githubRepo' => $einstellungen['github_repo'],
-    'githubTokenGesetzt' => $einstellungen['github_token'] !== '',
     'rollenvorlagen' => $einstellungen['rollenvorlagen'],
+    'betreiber' => $einstellungen['betreiber'],
+    'datenschutzKontakt' => $einstellungen['datenschutz_kontakt'],
+    'datenschutzZusatz' => $einstellungen['datenschutz_zusatz'],
+  );
+}
+
+/* Öffentliche Angaben für die Datenschutzerklärung (ohne Anmeldung abrufbar) */
+function datenschutzAngaben($einstellungen) {
+  return array(
+    'name' => $einstellungen['name'],
+    'betreiber' => $einstellungen['betreiber'],
+    'kontakt' => $einstellungen['datenschutz_kontakt'],
+    'zusatz' => $einstellungen['datenschutz_zusatz'],
+    'mailAktiv' => (bool) $einstellungen['mail_aktiv'],
+    'version' => lokaleVersion(),
   );
 }

@@ -19,6 +19,15 @@ var SeiteEinstellungen = {
           <div class="formular__aktionen"><ae-button type="submit" :disabled="laeuft">Speichern</ae-button></div>
         </form>
 
+        <form v-if="tab === 'datenschutz' && werte" class="ae-card formular" @submit.prevent="speichern">
+          <p class="leise">Orev bringt eine Datenschutzerklärung mit, die beschreibt, was die Software technisch tut. Verantwortlich ist, wer diese Installation betreibt: Ergänzen Sie Ihre Angaben und prüfen Sie den Text für Ihre Organisation. Die Erklärung ist ohne Anmeldung unter <router-link to="/datenschutz" target="_blank">Datenschutz</router-link> erreichbar.</p>
+          <ae-textarea v-model="werte.betreiber" label="Verantwortliche Stelle" :rows="3" maxlength="1000" placeholder="Name der Organisation, Adresse"></ae-textarea>
+          <ae-input v-model="werte.datenschutzKontakt" label="E-Mail für Datenschutzanfragen" type="email" icon="mail"></ae-input>
+          <ae-textarea v-model="werte.datenschutzZusatz" label="Ergänzende Angaben (optional)" :rows="4" maxlength="20000" hint="Erscheint am Schluss der Erklärung, z. B. Hosting-Anbieter und Serverstandort."></ae-textarea>
+          <ae-alert v-if="meldung" :tone="fehler ? 'danger' : 'success'">{{ meldung }}</ae-alert>
+          <div class="formular__aktionen"><ae-button type="submit" :disabled="laeuft">Speichern</ae-button></div>
+        </form>
+
         <form v-if="tab === 'mail' && werte" class="ae-card formular" @submit.prevent="speichern">
           <p class="leise">Einladungen versendet Orev über die E-Mail-Funktion des Hostings. Ohne Versand kopieren Sie den Einladungslink und schicken ihn selbst.</p>
           <ae-checkbox v-model="werte.mailAktiv" label="Einladungen per E-Mail versenden"></ae-checkbox>
@@ -84,19 +93,7 @@ var SeiteEinstellungen = {
             <ae-alert v-else-if="stand && stand.aktuell" tone="success">Orev ist auf dem neuesten Stand.</ae-alert>
             <ae-alert v-if="updateMeldung" :tone="fehler ? 'danger' : 'success'">{{ updateMeldung }}</ae-alert>
           </div>
-          <hr class="ae-divider ae-divider--dashed">
-          <form v-if="werte" class="formular" @submit.prevent="speichern">
-            <div class="formular__zeile">
-              <ae-input v-model="werte.githubRepo" label="GitHub-Repository" placeholder="aewebch/orev" required></ae-input>
-              <ae-input v-model="githubToken" label="GitHub-Token (nur Lesezugriff)" type="password" autocomplete="off"
-                :placeholder="werte.githubTokenGesetzt ? 'gespeichert, leer lassen zum Behalten' : 'nur für private Repositories'"></ae-input>
-            </div>
-            <p class="leise">Die Prüfung fragt nur nach dem neuesten Release; es werden keine Daten dieser Installation übermittelt. Der Token wird verschlüsselt gespeichert und nie angezeigt.</p>
-            <div class="formular__aktionen">
-              <ae-button v-if="werte.githubTokenGesetzt" variant="tertiary" @click="tokenEntfernen">Token entfernen</ae-button>
-              <ae-button type="submit" :disabled="laeuft">Speichern</ae-button>
-            </div>
-          </form>
+          <p class="leise">Die Prüfung fragt nur beim offiziellen Orev-Repository nach dem neuesten Release; es werden keine Daten dieser Installation übermittelt.</p>
         </ae-card>
       </div>
 
@@ -176,10 +173,10 @@ var SeiteEinstellungen = {
         { id: 'vorlagen', label: 'Rollenvorlagen', icon: 'shield-check' },
         { id: 'programmvorlagen', label: 'Programmvorlagen', icon: 'list' },
         { id: 'mail', label: 'E-Mail', icon: 'mail' },
+        { id: 'datenschutz', label: 'Datenschutz', icon: 'lock' },
         { id: 'updates', label: 'Version und Updates', icon: 'refresh-cw' },
       ],
       werte: null,
-      githubToken: '',
       meldung: '',
       fehler: false,
       laeuft: false,
@@ -242,10 +239,8 @@ var SeiteEinstellungen = {
       this.laeuft = true
       this.meldung = ''
       var daten = Object.assign({}, this.werte)
-      if (this.githubToken !== '') daten.githubToken = this.githubToken
       try {
         this.werte = (await api.anfrage('einstellungen_speichern', daten)).einstellungen
-        this.githubToken = ''
         zustand.name = this.werte.name
         document.title = this.werte.name
         this.fehler = false
@@ -290,11 +285,6 @@ var SeiteEinstellungen = {
       if (!confirm('Vorlage «' + this.vorlage.name + '» löschen?')) return
       var index = this.vorlage.index
       this.vorlagenSpeichern(this.werte.rollenvorlagen.filter(function (v, i) { return i !== index }))
-    },
-    async tokenEntfernen() {
-      this.githubToken = ''
-      var daten = Object.assign({}, this.werte, { githubToken: '' })
-      this.werte = (await api.anfrage('einstellungen_speichern', daten)).einstellungen
     },
     async personenLaden() {
       this.personen = (await api.anfrage('benutzer_liste')).personen
